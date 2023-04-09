@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="./login.css">
+</head>
+<body>
+  <div class="container">
+    <div class="login-form">
+      <form>
+        <h2>Login</h2>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" minlength="6" required>
+
+        <button type="submit">Login</button>
+      </form>
+      New User? <a href="./index.html">Sign Up</a>
+      <p><a href="./forgotPassword.html">Forgot Password</a></p>
+    </div>
+  </div>
+  <script src="./login.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
+</body>
+</html>
