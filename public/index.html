@@ -1,31 +1,30 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Signup | Whatsapp Clone</title>
-    <link rel="stylesheet" href="index.css">
-  </head>
-  <body>
-    <div class="signup-form">
-      <h2>Signup</h2>
-      <form>
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input type="text" id="name" name="name" placeholder="Enter your name" required>
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required>
-        </div>
-        <div class="form-group">
-          <label for="phone">Phone Number</label>
-          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="Enter a strong password" required>
-        </div>
-        <button type="submit">Signup</button>
-      </form>
-    </div>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup</title>
+  <link rel="stylesheet" href="./index.css">
+  <script src="./index.js" defer></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Create an account</h1>
+    <form>
+      <label for="userName">Full Name</label>
+      <input type="text" id="userName" name="userName" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="phoneNumber">Phone Number</label>
+      <input type="tel" id="phoneNumber" name="phoneNumber" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" minlength="6" required>
+
+      <input type="submit" value="Sign Up">
+    </form>
+  </div>
+</body>
 </html>
