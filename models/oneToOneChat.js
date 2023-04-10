@@ -16,6 +16,14 @@ const OneToOneChat = sequelize.define('OneToOneChat', {
     message: {
         type: Sequelize.STRING,
         allowNull: false
+    },
+    timeInMs: {
+        type: Sequelize.BIGINT,
+        allowNull: false
+    },
+    timeString: {
+        type: Sequelize.STRING,
+        allowNull: false
     }
 })
 

@@ -7,4 +7,6 @@ const router = express.Router()
 
 router.post('/create', userAuthenticationController.userAuthentication, chatController.createChat)
 
+router.get('/load-previous-chats', userAuthenticationController.userAuthentication, chatController.loadPreviousChats)
+
 module.exports = router

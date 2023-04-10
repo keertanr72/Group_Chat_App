@@ -1,12 +1,20 @@
+const { Op } = require('sequelize');
+
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user')
 const { send } = require('process')
 
-exports.getUsers = async (req, res) => {
+exports.getUsersExceptSelf = async (req, res) => {
     try {
-        const users = await User.findAll()
+        const users = await User.findAll({
+            where: {
+                userName: {
+                  [Op.notIn]: [req.user.userName]
+                }
+            }
+        })
         res.json({users})
     } catch (error) {
         console.log(error)
