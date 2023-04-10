@@ -14,6 +14,7 @@ form.addEventListener('submit', async (event) => {
         const userData = await axios.post('http://localhost:3000/user/login', obj)
         localStorage.setItem('token', userData.data.token)
         alert('success')
+        window.location.href = "/public/chatFrontend.html"
     } catch (error) {
         if(error.response.status == 403) {
             alert("Email Doesn't exist")
