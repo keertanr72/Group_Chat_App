@@ -1,42 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-	<title>Chat App</title>
-	<link rel="stylesheet" type="text/css" href="./chatFrontend.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WhatsApp Clone</title>
+	<link rel="stylesheet" href="./chatFrontend.css">
+	<script src="./chatFrontend.js" defer></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
 </head>
+
 <body>
-	<div class="wrapper">
-		<div class="header">
-			<h2>Chat App</h2>
-			<div class="online-users">
-				<h3>Online Users</h3>
-				<ul>
-					<li>User 1</li>
-					<li>User 2</li>
-					<li>User 3</li>
-				</ul>
-			</div>
+	<div class="container">
+		<div class="users">
+			<ul class="user-list" id="userList">
+				<!-- <li class="user">
+					<div class="user-avatar">
+						<img src="https://via.placeholder.com/50" alt="user-avatar">
+					</div>
+					<div class="user-info">
+						<h4 class="user-name">John Doe</h4>
+						<p class="user-status">Online</p>
+					</div>
+				</li>
+				<li class="user active">
+					<div class="user-avatar">
+						<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">
+					</div>
+					<div class="user-info">
+						<h4 class="user-name">Jane Doe</h4>
+						<p class="user-status">Offline</p>
+					</div>
+				</li> -->
+				<!-- <li class="user">
+					<div class="user-avatar">
+						<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">
+					</div>
+					<div class="user-info">
+						<h4 class="user-name">Bob Smith</h4>
+						<p class="user-status">Online</p>
+					</div>
+				</li> -->
+			</ul>
 		</div>
-		<div class="main">
-			<div class="chat-box">
-				<ul>
-					<li class="sent">
-						<p>Hello, how are you?</p>
+		<div class="chat">
+			<div class="chat-header">
+				<div id="imgUpdate" class="chat-avatar"></div>
+				<div class="chat-info">
+					<h4 id="currentTextingPerson" class="chat-name"></h4>
+					<p class="chat-status"></p>
+				</div>
+			</div>
+			<div class="chat-messages">
+				<ul class="message-list" id="allMessages">
+					<li class="message received">
+						<p class="message-text">Hey, how are you doing?</p>
+						<div class="message-info">
+							<span class="message-time">10:20 AM</span>
+						</div>
 					</li>
-					<li class="received">
-						<p>I'm good, thanks for asking. How about you?</p>
+					<li class="message sent">
+						<p class="message-text">I'm doing great, thanks for asking!</p>
+						<div class="message-info">
+							<span class="message-time-right">10:25 AM</span>
+						</div>
 					</li>
-					<li class="sent">
-						<p>I'm doing well, thanks.</p>
+					<li class="message received">
+						<p class="message-text">That's great to hear!</p>
+						<div class="message-info">
+							<span class="message-time">10:30 AM</span>
+						</div>
 					</li>
-					<!-- Add more messages here -->
 				</ul>
 			</div>
-			<div class="input-box">
-				<input type="text" placeholder="Type a message...">
-				<button>Send</button>
+			<div class="chat-input">
+				<input id="sentMessage" type="text" placeholder="Type your message...">
+				<button onclick="sentMessageFunction()">Send</button>
 			</div>
 		</div>
 	</div>
 </body>
+
 </html>
