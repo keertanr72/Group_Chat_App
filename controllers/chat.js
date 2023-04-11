@@ -49,3 +49,21 @@ exports.loadPreviousChats = async (req, res) => {
     res.json({ chats, userId: req.user.id })
 }
 
+exports.loadLiveReceiverMessages = async (req, res) => {
+    const receiverName = req.query.receiverName
+    const timeInMs = req.query.timeInMs
+    const receiverData = await User.findOne({ where: { userName: receiverName } })
+    const chats = await OneToOneChat.findAll(
+        {
+            where: {
+                [Op.and]: [
+                    { receiverId: req.user.id },
+                    { userId: receiverData.id },
+                    { timeInMs: { [Op.gt]: timeInMs } }
+                ]
+            },
+            order: [['timeInMs', 'ASC']]
+        })
+    res.json({ chats, userId: req.user.id })
+}
+

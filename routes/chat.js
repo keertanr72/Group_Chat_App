@@ -9,4 +9,6 @@ router.post('/create', userAuthenticationController.userAuthentication, chatCont
 
 router.get('/load-previous-chats', userAuthenticationController.userAuthentication, chatController.loadPreviousChats)
 
+router.get('/load-live-receiver-messages', userAuthenticationController.userAuthentication, chatController.loadLiveReceiverMessages)
+
 module.exports = router

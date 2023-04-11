@@ -1,5 +1,3 @@
-// const { token } = require("morgan")
-
 const sentMessageFunction = async () => {
     try {
         const currentTextingPerson = document.getElementById('currentTextingPerson').textContent
@@ -66,7 +64,6 @@ const updateUserList = async () => {
     const token = localStorage.getItem('token')
     const userList = document.getElementById('userList')
     const users = await axios.get('http://localhost:3000/user/get-users', { headers: { "Authorization": token } })
-    console.log(users.data.users)
     for (let user of users.data.users) {
         const liElement = document.createElement('li')
         liElement.className = 'user'
@@ -89,28 +86,49 @@ const addListners = () => {
     const imgUpdate = document.getElementById('imgUpdate')
 
     for (let i = 0; i < users.length; i++) {
-        users[i].addEventListener('click', async () => {
-            document.getElementById('allMessages').innerHTML = ''
-            imgUpdate.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">`
-            currentTextingPerson.textContent = users[i].querySelector('.user-name').textContent
-            setInterval(async () => {
+        try {
+            users[i].addEventListener('click', async () => {
                 document.getElementById('allMessages').innerHTML = ''
+                imgUpdate.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">`
+                currentTextingPerson.textContent = users[i].querySelector('.user-name').textContent
                 await loadPreviousChats(currentTextingPerson.textContent)
-            }, 1000)
-        });
+                setInterval(async () => {
+                    const token = localStorage.getItem('token')
+                    const recentReceivedChat = JSON.parse(localStorage.getItem('recentReceivedChat'))
+                    const chats = await axios.get(`http://localhost:3000/chat/load-live-receiver-messages/?receiverName=${currentTextingPerson.textContent}&timeInMs=${recentReceivedChat.timeInMs}`, { headers: { "Authorization": token } })
+                    if (chats.data.chats.length !== 0) {
+                        localStorage.setItem('recentReceivedChat', JSON.stringify(chats.data.chats[0]))
+                        loadMessagesFunction(chats.data.chats[0], chats.data.chats[0].receiverId)
+
+                    }
+                }, 1000)
+            });
+        } catch (error) {
+            console.log(error)
+        }
+
     }
 }
 
 const loadPreviousChats = async (userName) => {
     try {
-        console.log(userName)
+        let recentReceivedChat
         const token = localStorage.getItem('token')
         const chats = await axios.get(`http://localhost:3000/chat/load-previous-chats/?receiverName=${userName}`, { headers: { "Authorization": token } })
         const currentUserId = chats.data.userId
-        for(let chat of chats.data.chats) {
-            console.log(chat, chat.userId)
+        for (let chat of chats.data.chats) {
             loadMessagesFunction(chat, currentUserId)
+            if (currentUserId !== chat.userId) {
+                recentReceivedChat = chat
+            }
         }
+        console.log(recentReceivedChat)
+        if (recentReceivedChat) {
+            localStorage.setItem('recentReceivedChat', JSON.stringify(recentReceivedChat))
+        } else {
+            localStorage.setItem('recentReceivedChat', 'null')
+        }
+
 
     } catch (error) {
         console.log(error)
@@ -133,7 +151,7 @@ const loadMessagesFunction = (chat, currentUserId) => {
     newMessageListItem.appendChild(newParagraph)
     newMessageListItem.appendChild(divElement)
     messageList.appendChild(newMessageListItem);
-    if(currentUserId === chat.userId) {
+    if (currentUserId === chat.userId) {
         newMessageListItem.className = 'message sent'
         spanElement.className = 'message-time-right'
     } else {
