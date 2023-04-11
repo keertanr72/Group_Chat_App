@@ -93,7 +93,10 @@ const addListners = () => {
             document.getElementById('allMessages').innerHTML = ''
             imgUpdate.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">`
             currentTextingPerson.textContent = users[i].querySelector('.user-name').textContent
-            await loadPreviousChats(currentTextingPerson.textContent)
+            setInterval(async () => {
+                document.getElementById('allMessages').innerHTML = ''
+                await loadPreviousChats(currentTextingPerson.textContent)
+            }, 1000)
         });
     }
 }
