@@ -1,3 +1,8 @@
+let userTokenNumber = 1
+let groupTokenNumber = 1
+const listOfUserTokens = []
+const listOfGroupTokens = []
+
 const sentMessageFunction = async () => {
     try {
         const currentTextingPerson = document.getElementById('currentTextingPerson').textContent
@@ -5,13 +10,17 @@ const sentMessageFunction = async () => {
             alert('choose whom to text')
             return
         }
-        console.log(currentTextingPerson)
         const sentMessageTime = getCurrentTime()
         const sentMessage = appendMessageFunction(sentMessageTime.timeString)
         const token = localStorage.getItem('token')
-        console.log(token)
-        const data = await axios.post('http://localhost:3000/chat/create', { sentMessage, currentTextingPerson, timeInMs: sentMessageTime.timeInMs, timeString: sentMessageTime.timeString }, { headers: { "Authorization": token } })
-        console.log(data)
+
+        const groupOrPerson = document.getElementById('groupOrPerson')
+        if (groupOrPerson.textContent === 'Group') {
+            const data = await axios.post(`http://localhost:3000/chat/create-group-chat/?groupId=${localStorage.getItem('currentTextingPerson')}`, { sentMessage, timeInMs: sentMessageTime.timeInMs, timeString: sentMessageTime.timeString }, { headers: { "Authorization": token } })
+
+        } else {
+            const data = await axios.post(`http://localhost:3000/chat/create/?receiverId=${localStorage.getItem('currentTextingPerson')}`, { sentMessage, timeInMs: sentMessageTime.timeInMs, timeString: sentMessageTime.timeString }, { headers: { "Authorization": token } })
+        }
     } catch (error) {
         console.log(error)
     }
@@ -56,8 +65,10 @@ const appendMessageFunction = (sentMessageTime) => {
 }
 
 window.addEventListener('load', async () => {
+    await updateGroupList()
     await updateUserList()
     addListners()
+    addGroupListners()
 });
 
 const updateUserList = async () => {
@@ -72,10 +83,77 @@ const updateUserList = async () => {
             <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">
         </div>
         <div class="user-info">
-            <h4 class="user-name">${user.userName}</h4>
-            <p class="user-status">Online</p>
+            <h4 class="user-name" id=user_token_no_${userTokenNumber}>${user.userName}</h4>
+            <p class="user-status"></p>
         </div>`
         userList.appendChild(liElement)
+        listOfUserTokens.push(`user_token_no_${userTokenNumber}`)
+        localStorage.setItem(`user_token_no_${userTokenNumber}`, user.id)
+        userTokenNumber++
+    }
+}
+
+const updateGroupList = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        const groupList = document.getElementById('groupList')
+        const groups = await axios.get('http://localhost:3000/group/get-groups', { headers: { "Authorization": token } })
+        console.log(groups.data.groups)
+        for (let group of groups.data.groups) {
+            const liElement = document.createElement('li')
+            liElement.className = 'group'
+            liElement.innerHTML +=
+                `<div class="user-avatar">
+                <img src="https://thumbs.dreamstime.com/b/teamwork-group-friends-logo-image-holding-each-other-39918563.jpg" alt="group-avatar">
+            </div>
+            <div class="group-info">
+                <h4 class="group-name" id=group_token_no_${groupTokenNumber}>${group.groupName}</h4>
+                <p class="group-status" id="typeGroup">Group</p>
+            </div>`
+            groupList.appendChild(liElement)
+            listOfGroupTokens.push(`group_token_no_${groupTokenNumber}`)
+            localStorage.setItem(`group_token_no_${groupTokenNumber}`, group.id)
+            groupTokenNumber++
+        }
+    } catch (error) {
+        console.log(error)
+    }
+
+}
+
+const addGroupListners = () => {
+    const groupList = document.getElementById('groupList');
+    const groups = groupList.getElementsByClassName('group');
+    const currentTextingPerson = document.getElementById('currentTextingPerson')
+    const imgUpdate = document.getElementById('imgUpdate')
+
+    for (let i = 0; i < listOfGroupTokens.length; i++) {
+        try {
+            document.getElementById(listOfGroupTokens[i]).addEventListener('click', async () => {
+                localStorage.setItem('currentTextingPerson', localStorage.getItem(listOfGroupTokens[i]))
+                document.getElementById('groupOrPerson').textContent = 'Group'
+                document.getElementById('allMessages').innerHTML = ''
+                imgUpdate.innerHTML = `<img src="https://thumbs.dreamstime.com/b/teamwork-group-friends-logo-image-holding-each-other-39918563.jpg" alt="group-avatar">`
+
+                currentTextingPerson.textContent = groups[i].querySelector('.group-name').textContent
+                await loadPreviousGroupChats(localStorage.getItem(listOfGroupTokens[i]))
+                setInterval(async () => {
+                    const token = localStorage.getItem('token')
+                    const recentReceivedChat = JSON.parse(localStorage.getItem('recentReceivedChat'))
+                    if (!recentReceivedChat) {
+                        localStorage.setItem('recentReceivedChat', JSON.stringify({}))
+                    }
+                    console.log(localStorage.getItem(listOfGroupTokens[i]))
+                    const chats = await axios.get(`http://localhost:3000/group/load-live-group-messages/?groupId=${localStorage.getItem(listOfGroupTokens[i])}&timeInMs=${recentReceivedChat.timeInMs}`, { headers: { "Authorization": token } })
+                    if (chats.data.chats.length !== 0) {
+                        localStorage.setItem('recentReceivedChat', JSON.stringify(chats.data.chats[0]))
+                        loadGroupMessagesFunction(chats.data.chats[0], chats.data.userId, chats.data.chats[0].user.userName)
+                    }
+                }, 1000)
+            });
+        } catch (error) {
+            console.log(error)
+        }
     }
 }
 
@@ -85,36 +163,65 @@ const addListners = () => {
     const currentTextingPerson = document.getElementById('currentTextingPerson')
     const imgUpdate = document.getElementById('imgUpdate')
 
-    for (let i = 0; i < users.length; i++) {
+    for (let i = 0; i < listOfUserTokens.length; i++) {
         try {
-            users[i].addEventListener('click', async () => {
+            document.getElementById(listOfUserTokens[i]).addEventListener('click', async () => {
+                localStorage.setItem('currentTextingPerson', localStorage.getItem(listOfUserTokens[i]))
+                document.getElementById('groupOrPerson').textContent = ''
                 document.getElementById('allMessages').innerHTML = ''
                 imgUpdate.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">`
                 currentTextingPerson.textContent = users[i].querySelector('.user-name').textContent
-                await loadPreviousChats(currentTextingPerson.textContent)
+                await loadPreviousChats(localStorage.getItem(listOfUserTokens[i]))
                 setInterval(async () => {
                     const token = localStorage.getItem('token')
                     const recentReceivedChat = JSON.parse(localStorage.getItem('recentReceivedChat'))
-                    const chats = await axios.get(`http://localhost:3000/chat/load-live-receiver-messages/?receiverName=${currentTextingPerson.textContent}&timeInMs=${recentReceivedChat.timeInMs}`, { headers: { "Authorization": token } })
+                    if (!recentReceivedChat) {
+                        localStorage.setItem('recentReceivedChat', JSON.stringify({}))
+                    }
+                    const chats = await axios.get(`http://localhost:3000/chat/load-live-receiver-messages/?receiverId=${localStorage.getItem(listOfUserTokens[i])}&timeInMs=${recentReceivedChat.timeInMs}`, { headers: { "Authorization": token } })
                     if (chats.data.chats.length !== 0) {
                         localStorage.setItem('recentReceivedChat', JSON.stringify(chats.data.chats[0]))
                         loadMessagesFunction(chats.data.chats[0], chats.data.chats[0].receiverId)
-
                     }
                 }, 1000)
             });
         } catch (error) {
             console.log(error)
         }
-
     }
 }
 
-const loadPreviousChats = async (userName) => {
+const loadPreviousGroupChats = async (groupId) => {
     try {
         let recentReceivedChat
         const token = localStorage.getItem('token')
-        const chats = await axios.get(`http://localhost:3000/chat/load-previous-chats/?receiverName=${userName}`, { headers: { "Authorization": token } })
+        const chats = await axios.get(`http://localhost:3000/group/load-previous-group-chats/?groupId=${groupId}`, { headers: { "Authorization": token } })
+        console.log(chats)
+        const currentUserId = chats.data.userId
+        for (let chat of chats.data.chats) {
+            loadGroupMessagesFunction(chat, currentUserId, chat.user.userName)
+            if (currentUserId !== chat.userId) {
+                recentReceivedChat = chat
+            }
+        }
+        console.log(recentReceivedChat)
+        if (recentReceivedChat) {
+            localStorage.setItem('recentReceivedChat', JSON.stringify(recentReceivedChat))
+        } else {
+            localStorage.setItem('recentReceivedChat', 'null')
+        }
+
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const loadPreviousChats = async (userId) => {
+    try {
+        let recentReceivedChat
+        const token = localStorage.getItem('token')
+        const chats = await axios.get(`http://localhost:3000/chat/load-previous-chats/?receiverId=${userId}`, { headers: { "Authorization": token } })
         const currentUserId = chats.data.userId
         for (let chat of chats.data.chats) {
             loadMessagesFunction(chat, currentUserId)
@@ -157,5 +264,38 @@ const loadMessagesFunction = (chat, currentUserId) => {
     } else {
         newMessageListItem.className = 'message received'
         spanElement.className = 'message-time'
+    }
+}
+
+const createGroupButtonFunction = () => {
+    window.location.href = '/public/createGroup.html'
+}
+
+const loadGroupMessagesFunction = (chat, currentUserId, senderUserName) => {
+
+    const allMessages = document.getElementById('allMessages')
+
+    if (currentUserId === chat.userId) {
+        allMessages.innerHTML +=
+        `<li class="message sent">
+            <div class="message-sender-right">
+                <span class="message-sender-name"></span>
+            </div>
+            <p class="message-text">${chat.message}</p>
+            <div class="message-info">
+                <span class="message-time-right">${chat.timeString}</span>
+            </div>
+        </li>`
+    } else {
+        allMessages.innerHTML +=
+        `<li class="message received">
+            <div class="message-sender-left">
+                <span class="message-sender-name">${senderUserName}</span>
+            </div>
+            <p class="message-text">${chat.message}</p>
+            <div class="message-info">
+                <span class="message-time">${chat.timeString}</span>
+            </div>
+        </li>`
     }
 }

@@ -13,6 +13,8 @@
 <body>
 	<div class="container">
 		<div class="users">
+			<button id="createGroupButton" onclick="createGroupButtonFunction()">Create Group</button>
+			<ul class="user-list" id="groupList"></ul>
 			<ul class="user-list" id="userList">
 				<!-- <li class="user">
 					<div class="user-avatar">
@@ -48,12 +50,45 @@
 				<div id="imgUpdate" class="chat-avatar"></div>
 				<div class="chat-info">
 					<h4 id="currentTextingPerson" class="chat-name"></h4>
-					<p class="chat-status"></p>
+					<p class="chat-status" id="groupOrPerson"></p>
 				</div>
 			</div>
 			<div class="chat-messages">
 				<ul class="message-list" id="allMessages">
-					<!-- <li class="message received">
+					
+					<!-- <li class="message received"></li>
+					<div class="message-sender-right">
+						<div class="message-sender-name">John Doe</div>
+						<div class="message-text">Hey there!</div>
+						<div class="message-info">
+							<div class="message-time-right">10:30 AM</div>
+						</div>
+					</div>
+					</li>
+
+					<li class="message sent">
+						<div class="message-sender-right">
+							<span class="message-sender-name">John</span>
+						</div>
+						<p class="message-text">I'm doing great, thanks for asking!</p>
+						<div class="message-info">
+							<span class="message-time-right">10:25 AM</span>
+						</div>
+					</li>
+
+					<li class="message received">
+						<div class="message-sender-left">
+							<span class="message-sender-name">John</span>
+						</div>
+						<p class="message-text">I'm doing great, thanks for asking!</p>
+						<div class="message-info">
+							<span class="message-time">10:25 AM</span>
+						</div>
+					</li>
+
+
+					
+					<li class="message received">
 						<p class="message-text">Hey, how are you doing?</p>
 						<div class="message-info">
 							<span class="message-time">10:20 AM</span>

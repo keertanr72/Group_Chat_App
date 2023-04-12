@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create Group</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+        }
+
+        form {
+            width: 400px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        input[type=text] {
+            width: 100%;
+            font-size: 16px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type=submit] {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+
+        input[type=submit]:hover {
+            background-color: #3e8e41;
+        }
+    </style>
+    <script src="./createGroup.js" defer></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
+</head>
+
+<body>
+    <form onsubmit="createGroupFunction(event)">
+        <h1>Create Group</h1>
+        <label for="groupName">Group Name:</label>
+        <input type="text" id="groupName" name="groupName" placeholder="Enter group name...">
+        <label>Add Members:</label>
+        <div id="usersCheckbox"></div>
+        <input type="submit" value="Create Group">
+    </form>
+</body>
+
+</html>
