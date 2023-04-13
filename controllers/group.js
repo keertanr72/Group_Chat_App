@@ -6,6 +6,55 @@ const UserGroup = require('../models/userGroup')
 const User = require('../models/user')
 const GroupChat = require('../models/groupChat')
 
+exports.getGroupUsersExceptSelf = async (req, res) => {
+    try {
+        const users = await UserGroup.findAll({
+            where: {
+                userId: {
+                    [Op.notIn]: [req.user.id]
+                },
+                groupId: {
+                    [Op.in]: [parseInt(req.query.groupId)]
+                }
+            },
+            include: [
+                {
+                    model: User,
+                    attributes: ['userName']
+                }
+            ]
+        })
+        res.json({ users })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.getGroupNonAdmins = async (req, res) => {
+    try {
+        const users = await UserGroup.findAll({
+            where: {
+                userId: {
+                    [Op.notIn]: [req.user.id]
+                },
+                groupId: {
+                    [Op.in]: [parseInt(req.query.groupId)]
+                },
+                isAdmin: false
+            },
+            include: [
+                {
+                    model: User,
+                    attributes: ['userName']
+                }
+            ]
+        })
+        res.json({ users })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 exports.createGroup = async (req, res) => {
     try {
         const transaction = await sequelize.transaction()
@@ -91,6 +140,108 @@ exports.loadLiveGroupMessages = async (req, res) => {
                 }]
             })
         res.json({ chats, userId: req.user.id })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.addMembers = async (req, res) => {
+    try {
+        const selectedUserNames = req.body.selectedUserNames
+        const groupId = req.query.groupId
+        const users = await User.findAll({
+            attributes: ['id'],
+            where: {
+                userName: {
+                    [Op.in]: selectedUserNames
+                }
+            }
+        })
+
+        const dataForCreating = users.map((user) => {
+            const data = {
+                isAdmin: false,
+                userId: user.id,
+                groupId: parseInt(groupId)
+            }
+            return data
+        })
+        console.log(dataForCreating)
+        await UserGroup.bulkCreate(dataForCreating)
+        res.json({ success: true })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.deleteMembers = async (req, res) => {
+    try {
+        let selectedUserNames = req.query.selectedUserNames
+        selectedUserNames = selectedUserNames.split(',')
+        const groupId = req.query.groupId
+        const users = await User.findAll({
+            attributes: ['id'],
+            where: {
+                userName: {
+                    [Op.in]: selectedUserNames
+                }
+            }
+        })
+
+        const userIds = users.map(user => user.id)
+        // console.log(dataForDeleting)
+        await UserGroup.destroy({
+            where: {
+                [Op.and]: [
+                    { userId: userIds },
+                    { groupId }
+                ]
+            }
+        })
+        res.json({ success: true })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.makeAdmin = async (req, res) => {
+    try {
+        let selectedUserNames = req.body.selectedUserNames
+        const groupId = req.query.groupId
+        const users = await User.findAll({
+            attributes: ['id'],
+            where: {
+                userName: {
+                    [Op.in]: selectedUserNames
+                }
+            }
+        })
+
+        const userIds = users.map(user => user.id)
+        // console.log(dataForDeleting)
+        await UserGroup.update({isAdmin: true}, {
+            where: {
+                [Op.and]: [
+                    { userId: userIds },
+                    { groupId }
+                ]
+            }
+        })
+        res.json({ success: true })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.inviteLinkClick = async (req, res) => {
+    try {
+        const groupId = req.query.groupId
+        await UserGroup.create({
+            isAdmin: false,
+            userId: parseInt(req.query.currentTextingPerson),
+            groupId: parseInt(groupId)
+        })
+        res.json({ success: true })
     } catch (error) {
         console.log(error)
     }

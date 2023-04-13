@@ -55,6 +55,9 @@ Group.belongsToMany(User, { through: UserGroup })
 Group.hasMany(GroupChat)
 GroupChat.belongsTo(Group)
 
+User.hasMany(UserGroup)
+UserGroup.belongsTo(User)
+
 sequelize
 .sync()
 // .sync({force: true})

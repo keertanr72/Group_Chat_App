@@ -15,35 +15,7 @@
 		<div class="users">
 			<button id="createGroupButton" onclick="createGroupButtonFunction()">Create Group</button>
 			<ul class="user-list" id="groupList"></ul>
-			<ul class="user-list" id="userList">
-				<!-- <li class="user">
-					<div class="user-avatar">
-						<img src="https://via.placeholder.com/50" alt="user-avatar">
-					</div>
-					<div class="user-info">
-						<h4 class="user-name">John Doe</h4>
-						<p class="user-status">Online</p>
-					</div>
-				</li>
-				<li class="user active">
-					<div class="user-avatar">
-						<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">
-					</div>
-					<div class="user-info">
-						<h4 class="user-name">Jane Doe</h4>
-						<p class="user-status">Offline</p>
-					</div>
-				</li> -->
-				<!-- <li class="user">
-					<div class="user-avatar">
-						<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">
-					</div>
-					<div class="user-info">
-						<h4 class="user-name">Bob Smith</h4>
-						<p class="user-status">Online</p>
-					</div>
-				</li> -->
-			</ul>
+			<ul class="user-list" id="userList"></ul>
 		</div>
 		<div class="chat">
 			<div class="chat-header">
@@ -52,61 +24,13 @@
 					<h4 id="currentTextingPerson" class="chat-name"></h4>
 					<p class="chat-status" id="groupOrPerson"></p>
 				</div>
+				<div id="addNewMemberButtonHere"></div>
+				<div id="addMakeAdminButtonHere"></div>
+				<div id="addRemoveMemberButtonHere"></div>
+				
 			</div>
 			<div class="chat-messages">
-				<ul class="message-list" id="allMessages">
-					
-					<!-- <li class="message received"></li>
-					<div class="message-sender-right">
-						<div class="message-sender-name">John Doe</div>
-						<div class="message-text">Hey there!</div>
-						<div class="message-info">
-							<div class="message-time-right">10:30 AM</div>
-						</div>
-					</div>
-					</li>
-
-					<li class="message sent">
-						<div class="message-sender-right">
-							<span class="message-sender-name">John</span>
-						</div>
-						<p class="message-text">I'm doing great, thanks for asking!</p>
-						<div class="message-info">
-							<span class="message-time-right">10:25 AM</span>
-						</div>
-					</li>
-
-					<li class="message received">
-						<div class="message-sender-left">
-							<span class="message-sender-name">John</span>
-						</div>
-						<p class="message-text">I'm doing great, thanks for asking!</p>
-						<div class="message-info">
-							<span class="message-time">10:25 AM</span>
-						</div>
-					</li>
-
-
-					
-					<li class="message received">
-						<p class="message-text">Hey, how are you doing?</p>
-						<div class="message-info">
-							<span class="message-time">10:20 AM</span>
-						</div>
-					</li>
-					<li class="message sent">
-						<p class="message-text">I'm doing great, thanks for asking!</p>
-						<div class="message-info">
-							<span class="message-time-right">10:25 AM</span>
-						</div>
-					</li>
-					<li class="message received">
-						<p class="message-text">That's great to hear!</p>
-						<div class="message-info">
-							<span class="message-time">10:30 AM</span>
-						</div>
-					</li> -->
-				</ul>
+				<ul class="message-list" id="allMessages"></ul>
 			</div>
 			<div class="chat-input">
 				<input id="sentMessage" type="text" placeholder="Type your message...">

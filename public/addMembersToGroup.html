@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WhatsApp Style Form</title>
+	<link rel="stylesheet" type="text/css" href="./addMembersToGroup.css">
+</head>
+<body>
+	<div class="chat-container">
+		<div class="header">
+			<h2>Add Members</h2>
+		</div>
+		<div class="form-container">
+			<form>
+                <div class="members-container">
+                    <ul id="member-list">
+                        <div class="checkbox-container" id="usersCheckbox">
+                            <h3>Select Members:</h3>
+                        </div>
+                    </ul>
+                </div>
+				<button type="submit" id="addButton">Add</button>
+				<div class="checkbox-container" id="inviteUsersCheckbox">
+					<h3>Send Invite:</h3>
+				</div>
+                <button type="submit" id="inviteButton">Invite</button>
+			</form>
+ 
+		</div>
+	</div>
+	<script src="./addMembersToGroup.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
+</body>
+</html>

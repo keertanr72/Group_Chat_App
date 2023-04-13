@@ -1,0 +1,104 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #E5DDD5;
+	font-family: Arial, sans-serif;
+}
+
+.chat-container {
+	margin: 50px auto;
+	max-width: 600px;
+	background-color: #fff;
+	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(0,0,0,0.3);
+	overflow: hidden;
+}
+
+.header {
+	background-color: #4AC959;
+	padding: 10px;
+	color: #fff;
+	text-align: center;
+}
+
+.form-container {
+	padding: 20px;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+}
+
+label {
+	margin-bottom: 10px;
+	font-weight: bold;
+}
+
+input[type="text"], button {
+	padding: 10px;
+	border: none;
+	border-radius: 3px;
+	margin-right: 10px;
+}
+
+button {
+	background-color: #4AC959;
+	color: #fff;
+	cursor: pointer;
+	padding: 8px 8px;
+	border: none;
+	border-radius: 5px;
+	font-size: 16px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+	transition: background-color 0.3s ease;
+}
+
+button:hover {
+	background-color: #449f4f;
+}
+
+.checkbox-container {
+	margin-top: 20px;
+}
+
+h3 {
+	font-weight: bold;
+	margin-bottom: 10px;
+}
+
+input[type="checkbox"], label {
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.members-container {
+	margin-top: 30px;
+}
+
+ul {
+	padding-left: 0;
+}
+
+li {
+	list-style: none;
+	padding: 5px 10px;
+	border-bottom: 1px solid #eee;
+}
+
+li:last-child {
+	border: none;
+}
+
+li span {
+	margin-right: 10px;
+}
+
+.selected {
+	background-color: #DCF8C6;
+}
+

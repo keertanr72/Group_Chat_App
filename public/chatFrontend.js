@@ -3,6 +3,9 @@ let groupTokenNumber = 1
 const listOfUserTokens = []
 const listOfGroupTokens = []
 
+let groupLiveListener = null
+let userLiveListener = null
+
 const sentMessageFunction = async () => {
     try {
         const currentTextingPerson = document.getElementById('currentTextingPerson').textContent
@@ -130,24 +133,45 @@ const addGroupListners = () => {
     for (let i = 0; i < listOfGroupTokens.length; i++) {
         try {
             document.getElementById(listOfGroupTokens[i]).addEventListener('click', async () => {
+                document.getElementById('addNewMemberButtonHere').innerHTML = ''
+                document.getElementById('addMakeAdminButtonHere').innerHTML = ''
+                document.getElementById('addRemoveMemberButtonHere').innerHTML = ''
+                if (groupLiveListener) {
+                    clearInterval(groupLiveListener);
+                }
+                if (userLiveListener) {
+                    clearInterval(userLiveListener);
+                }
                 localStorage.setItem('currentTextingPerson', localStorage.getItem(listOfGroupTokens[i]))
                 document.getElementById('groupOrPerson').textContent = 'Group'
                 document.getElementById('allMessages').innerHTML = ''
                 imgUpdate.innerHTML = `<img src="https://thumbs.dreamstime.com/b/teamwork-group-friends-logo-image-holding-each-other-39918563.jpg" alt="group-avatar">`
+                const token = localStorage.getItem('token')
+                const adminStatus = await axios.get(`http://localhost:3000/user/check-admin-status/?currentTextingPerson=${localStorage.getItem('currentTextingPerson')}`, { headers: { "Authorization": token } })
 
+                console.log(adminStatus.data.userData.isAdmin)
+
+                if(adminStatus.data.userData.isAdmin) {
+                    document.getElementById('addNewMemberButtonHere').innerHTML = '<button id="addMembersButton" onclick="addMembersButtonFunction()">Add Members</button>'
+
+                    document.getElementById('addMakeAdminButtonHere').innerHTML = '<button id="makeAdminButton" onclick="createAdminFunction()">Create New Admins</button>'
+
+                    document.getElementById('addRemoveMemberButtonHere').innerHTML = '<button id="removeMembersButton" onclick="removeMembersFunction()">Remove Members</button>'
+                }
                 currentTextingPerson.textContent = groups[i].querySelector('.group-name').textContent
                 await loadPreviousGroupChats(localStorage.getItem(listOfGroupTokens[i]))
-                setInterval(async () => {
+                groupLiveListener = setInterval(async () => {
                     const token = localStorage.getItem('token')
                     const recentReceivedChat = JSON.parse(localStorage.getItem('recentReceivedChat'))
                     if (!recentReceivedChat) {
                         localStorage.setItem('recentReceivedChat', JSON.stringify({}))
                     }
-                    console.log(localStorage.getItem(listOfGroupTokens[i]))
                     const chats = await axios.get(`http://localhost:3000/group/load-live-group-messages/?groupId=${localStorage.getItem(listOfGroupTokens[i])}&timeInMs=${recentReceivedChat.timeInMs}`, { headers: { "Authorization": token } })
                     if (chats.data.chats.length !== 0) {
+                        console.log(chats.data.chats[0].userId)
                         localStorage.setItem('recentReceivedChat', JSON.stringify(chats.data.chats[0]))
-                        loadGroupMessagesFunction(chats.data.chats[0], chats.data.userId, chats.data.chats[0].user.userName)
+                        if (chats.data.chats[0].userId !== chats.data.userId)
+                            loadGroupMessagesFunction(chats.data.chats[0], chats.data.userId, chats.data.chats[0].user.userName)
                     }
                 }, 1000)
             });
@@ -166,13 +190,22 @@ const addListners = () => {
     for (let i = 0; i < listOfUserTokens.length; i++) {
         try {
             document.getElementById(listOfUserTokens[i]).addEventListener('click', async () => {
+                document.getElementById('addNewMemberButtonHere').innerHTML = ''
+                document.getElementById('addMakeAdminButtonHere').innerHTML = ''
+                document.getElementById('addRemoveMemberButtonHere').innerHTML = ''
+                if (groupLiveListener) {
+                    clearInterval(groupLiveListener);
+                }
+                if (userLiveListener) {
+                    clearInterval(userLiveListener);
+                }
                 localStorage.setItem('currentTextingPerson', localStorage.getItem(listOfUserTokens[i]))
                 document.getElementById('groupOrPerson').textContent = ''
                 document.getElementById('allMessages').innerHTML = ''
                 imgUpdate.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="user-avatar">`
                 currentTextingPerson.textContent = users[i].querySelector('.user-name').textContent
                 await loadPreviousChats(localStorage.getItem(listOfUserTokens[i]))
-                setInterval(async () => {
+                userLiveListener = setInterval(async () => {
                     const token = localStorage.getItem('token')
                     const recentReceivedChat = JSON.parse(localStorage.getItem('recentReceivedChat'))
                     if (!recentReceivedChat) {
@@ -277,7 +310,7 @@ const loadGroupMessagesFunction = (chat, currentUserId, senderUserName) => {
 
     if (currentUserId === chat.userId) {
         allMessages.innerHTML +=
-        `<li class="message sent">
+            `<li class="message sent">
             <div class="message-sender-right">
                 <span class="message-sender-name"></span>
             </div>
@@ -288,7 +321,7 @@ const loadGroupMessagesFunction = (chat, currentUserId, senderUserName) => {
         </li>`
     } else {
         allMessages.innerHTML +=
-        `<li class="message received">
+            `<li class="message received">
             <div class="message-sender-left">
                 <span class="message-sender-name">${senderUserName}</span>
             </div>
@@ -298,4 +331,16 @@ const loadGroupMessagesFunction = (chat, currentUserId, senderUserName) => {
             </div>
         </li>`
     }
+}
+
+const addMembersButtonFunction = () => {
+    window.location.href = '/public/addMembersToGroup.html'
+}
+
+const removeMembersFunction = () => {
+    window.location.href = '/public/removeMembersFromGroup.html'
+}
+
+const createAdminFunction = () => {
+    window.location.href = '/public/createAdmin.html'
 }

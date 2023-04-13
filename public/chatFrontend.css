@@ -181,40 +181,6 @@ body {
 	margin-bottom: 5px;
 }
 
-/* .message {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-} */
-
-/* .message-sender-left {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	font-size: 12px;
-	color: #999;
-	margin-bottom: 5px;
-}
-
-.message-sender-left .message-sender-name {
-	font-weight: bold;
-	margin-bottom: 5px;
-}
-
-.message-sender-right {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	font-size: 12px;
-	color: #999;
-	margin-bottom: 5px;
-}
-
-.message-sender-right .message-sender-name {
-	font-weight: bold;
-	margin-bottom: 5px;
-} */
-
 .chat-input {
 	display: flex;
 	align-items: center;
@@ -267,7 +233,37 @@ body {
 	margin-top: 20px;
 }
 
-
+#addMembersButton {
+	background-color: #007bff;
+	color: #fff;
+	padding: 10px 20px;
+	border-radius: 5px;
+	border: none;
+	cursor: pointer;
+	margin-top: 20px;
+	}
+	
+	/* Button for removing existing members */
+	#removeMembersButton {
+	background-color: #007bff;
+	color: #fff;
+	padding: 10px 20px;
+	border-radius: 5px;
+	border: none;
+	cursor: pointer;
+	margin-top: 20px;
+	}
+	
+	/* Button for promoting members to admin status */
+	#makeAdminButton {
+	background-color: #0db0c6;
+	color: #fff;
+	padding: 10px 20px;
+	border-radius: 5px;
+	border: none;
+	cursor: pointer;
+	margin-top: 20px;
+	}
 
 .group-list {
 	list-style-type: none;

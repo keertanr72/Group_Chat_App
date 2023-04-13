@@ -26,6 +26,40 @@ exports.createChat = async (req, res) => {
     }
 }
 
+exports.createLinkChat = async (req, res) => {
+    try {
+        const selectedUserNames = req.body.selectedUserNames
+        const message = req.body.sentMessage
+        const timeInMs = req.body.timeInMs
+        const timeString = req.body.timeString
+
+        const users = await User.findAll({
+            attributes: ['id'],
+            where: {
+                userName: {
+                    [Op.in]: selectedUserNames
+                }
+            }
+        });
+        console.log(users)
+        const dataToCreate = users.map(user => {
+            const data = {
+                receiverId: user.id,
+                message: message + `&currentTextingPerson=${user.id}`,
+                timeInMs,
+                timeString,
+                userId: req.user.id
+            }
+            return data
+        });
+        console.log(dataToCreate)
+        await OneToOneChat.bulkCreate(dataToCreate)
+        res.json({ success: true })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 exports.createGroupChat = async (req, res) => {
     try {
         const groupId = req.query.groupId
