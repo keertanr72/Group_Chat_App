@@ -2,8 +2,12 @@ const express = require('express')
 
 const bodyParser = require('body-parser')
 const path = require('path')
+const fs = require('fs')
 
 const cors = require('cors')
+const helmet = require('helmet')
+const compression = require('compression')
+const morgan = require('morgan')
 
 const UserRoute = require('./routes/user')
 const forgotPasswordRoute = require('./routes/forgotPassword')
@@ -21,12 +25,18 @@ const Group = require('./models/group')
 const GroupChat = require('./models/groupChat')
 const UserGroup = require('./models/userGroup')
 
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+
 const app = express()
 
 app.use(cors({
     origin: 'http://127.0.0.1:5500',
     credentials: true
 }))
+app.use(helmet())
+app.use(compression())
+// app.use(morgan(`combined`, { stream: accessLogStream }))
+
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
