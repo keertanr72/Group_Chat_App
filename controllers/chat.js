@@ -1,3 +1,5 @@
+// const io = require('socket.io')()
+
 const { Op } = require('sequelize');
 
 const OneToOneChat = require('../models/oneToOneChat')
@@ -5,7 +7,8 @@ const User = require('../models/user')
 
 const Group = require('../models/group')
 const UserGroup = require('../models/userGroup')
-const GroupChat = require('../models/groupChat')
+const GroupChat = require('../models/groupChat');
+const { Server } = require('engine.io');
 
 exports.createChat = async (req, res) => {
     try {
@@ -13,14 +16,15 @@ exports.createChat = async (req, res) => {
         const message = req.body.sentMessage
         const timeInMs = req.body.timeInMs
         const timeString = req.body.timeString
-        await OneToOneChat.create({
+        const chat = await OneToOneChat.create({
             receiverId,
             message,
             timeInMs,
             timeString,
             userId: req.user.id
         })
-        res.json({ success: true })
+
+        res.json({ success: true, userId: req.user.id, chat })
     } catch (error) {
         console.log(error)
     }
@@ -66,14 +70,17 @@ exports.createGroupChat = async (req, res) => {
         const message = req.body.sentMessage
         const timeInMs = req.body.timeInMs
         const timeString = req.body.timeString
-        await GroupChat.create({
+        const chat = await GroupChat.create({
             message,
             timeInMs,
             timeString,
             userId: req.user.id,
             groupId
         })
-        res.json({ success: true })
+        const userName = await User.findByPk(req.user.id, {
+            attributes: ['userName']
+        })
+        res.json({ success: true, chat, userName })
     } catch (error) {
         console.log(error)
     }
