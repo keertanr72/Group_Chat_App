@@ -241,10 +241,10 @@ body {
 	border: none;
 	cursor: pointer;
 	margin-top: 20px;
-	}
-	
-	/* Button for removing existing members */
-	#removeMembersButton {
+}
+
+/* Button for removing existing members */
+#removeMembersButton {
 	background-color: #007bff;
 	color: #fff;
 	padding: 10px 20px;
@@ -252,10 +252,10 @@ body {
 	border: none;
 	cursor: pointer;
 	margin-top: 20px;
-	}
-	
-	/* Button for promoting members to admin status */
-	#makeAdminButton {
+}
+
+/* Button for promoting members to admin status */
+#makeAdminButton {
 	background-color: #0db0c6;
 	color: #fff;
 	padding: 10px 20px;
@@ -263,7 +263,7 @@ body {
 	border: none;
 	cursor: pointer;
 	margin-top: 20px;
-	}
+}
 
 .group-list {
 	list-style-type: none;
@@ -307,3 +307,43 @@ body {
 	font-size: 14px;
 	color: #999;
 }
+
+
+
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background-color: #f8f8f8;
+    position: relative;
+}
+.chat-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.chat-header .chat-info {
+    flex: 1;
+}
+.chat-header .chat-info h4 {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+.chat-header .chat-info p {
+    font-size: 14px;
+    color: #999;
+}
+.chat-header .chat-avatar {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    z-index: -1;
+}
+
+img {
+	max-width: 300px;
+	max-height: 500px;
+  }

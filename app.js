@@ -9,6 +9,7 @@ const UserRoute = require('./routes/user')
 const forgotPasswordRoute = require('./routes/forgotPassword')
 const chatRoute = require('./routes/chat')
 const groupRoute = require('./routes/group')
+const imageRoute = require('./routes/image')
 
 const errorController = require('./controllers/error')
 
@@ -31,7 +32,6 @@ const io = require('socket.io')(http, {
         methods: ['GET', 'POST']
     }
 });
-
 
 io.on('connection', (socket) => {
 
@@ -64,9 +64,11 @@ app.use(cors({
     origin: ['http://127.0.0.1:5500'],
     credentials: true
 }))
+app.use('/image', imageRoute)
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
+
 
 app.use('/user', UserRoute)
 

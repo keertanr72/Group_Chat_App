@@ -48,11 +48,11 @@ exports.createLinkChat = async (req, res) => {
         console.log(users)
         const dataToCreate = users.map(user => {
             const data = {
-                receiverId: user.id,
+                receiverId: req.user.id,
                 message: message + `&currentTextingPerson=${user.id}`,
                 timeInMs,
                 timeString,
-                userId: req.user.id
+                userId: user.id
             }
             return data
         });

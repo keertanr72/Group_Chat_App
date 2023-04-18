@@ -20,6 +20,9 @@
 			<ul class="user-list" id="userList"></ul>
 		</div>
 		<div class="chat">
+
+			<!-- <img src="http://localhost:3000/image/f5ec6bd1fa5fc4978d50fd3d2ebcc940" alt="Image Description"> -->
+
 			<div class="chat-header">
 				<div id="imgUpdate" class="chat-avatar"></div>
 				<div class="chat-info">
@@ -29,12 +32,17 @@
 				<div id="addNewMemberButtonHere"></div>
 				<div id="addMakeAdminButtonHere"></div>
 				<div id="addRemoveMemberButtonHere"></div>
-				
 			</div>
 			<div class="chat-messages">
 				<ul class="message-list" id="allMessages"></ul>
 			</div>
 			<div class="chat-input">
+				<div>
+					<form id="file-form">
+						<input type="file" id="fileInput">
+					</form>
+				</div>
+
 				<input id="sentMessage" type="text" placeholder="Type your message...">
 				<button onclick="sentMessageFunction()">Send</button>
 			</div>
