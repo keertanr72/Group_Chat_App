@@ -1,14 +1,25 @@
-const Sequelize = require('sequelize');
+const MongoClient = require('mongodb').MongoClient
 
-require('dotenv').config()
+let _db
 
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
-  host: process.env.DB_HOST,
-  dialect: 'mysql', // replace this with the database dialect you are using
-});
+const mongoConnect = (callback) => {
+  MongoClient.connect('mongodb+srv://keertan:keertan@cluster0.9m5vdch.mongodb.net/groupchatapp?retryWrites=true&w=majority')
+    .then(client => {
+      console.log('connected')
+      _db = client.db()
+      callback(client)
+    })
+    .catch(err => {
+      console.log(err)
+      throw err
+    })
+}
 
-sequelize.authenticate()
-  .then(() => console.log('Connection has been established successfully.'))
-  .catch((error) => console.error('Unable to connect to the database:', error));
+const getDb = () => {
+  if(_db)
+    return _db
+  throw 'db not found'
+}
 
-module.exports = sequelize;
+exports.mongoConnect = mongoConnect
+exports.getDb = getDb
