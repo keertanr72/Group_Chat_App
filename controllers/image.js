@@ -12,14 +12,14 @@ exports.getFromS3 = (req, res) => {
     const key = req.params.key
     const readStream = getFileStream(key)
     readStream.pipe(res)
-  }
+}
 
 exports.postToS3 = async (req, res) => {
     try {
         const result = await uploadFile(req.file)
         await unlinkFile(req.file.path)
 
-        if(req.query.groupId) {
+        if (req.query.groupId) {
             const groupId = req.query.groupId
             const message = `http://localhost:3000/image/${result.Key}`
             const timeInMs = req.query.timeInMs
@@ -44,8 +44,7 @@ exports.postToS3 = async (req, res) => {
                 userId: req.user.id
             })
         }
-
-        res.json({imagePath: `http://localhost:3000/image/${result.Key}`})
+        res.json({ imagePath: `http://localhost:3000/image/${result.Key}` })
     } catch (error) {
         console.log(error)
     }

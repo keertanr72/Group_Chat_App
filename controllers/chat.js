@@ -7,8 +7,7 @@ const User = require('../models/user')
 
 const Group = require('../models/group')
 const UserGroup = require('../models/userGroup')
-const GroupChat = require('../models/groupChat');
-const { Server } = require('engine.io');
+const GroupChat = require('../models/groupChat')
 
 exports.createChat = async (req, res) => {
     try {
@@ -23,7 +22,6 @@ exports.createChat = async (req, res) => {
             timeString,
             userId: req.user.id
         })
-
         res.json({ success: true, userId: req.user.id, chat })
     } catch (error) {
         console.log(error)

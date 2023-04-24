@@ -8,6 +8,8 @@ const UserGroup = require('../models/userGroup')
 
 const { send } = require('process')
 
+// geting users for frontend
+
 exports.getUsersExceptSelf = async (req, res) => {
     try {
         const users = await User.findAll({
@@ -22,6 +24,8 @@ exports.getUsersExceptSelf = async (req, res) => {
         console.log(error)
     }
 }
+
+// getting users to add to group
 
 exports.getNewUsersExceptSelf = async (req, res) => {
     try {
@@ -47,6 +51,8 @@ exports.getNewUsersExceptSelf = async (req, res) => {
         console.log(error)
     }
 }
+
+// checking if email exists
 
 exports.checkUser = async (req, res, next) => {
     try {
@@ -111,6 +117,8 @@ exports.userLogin = async (req, res) => {
         console.log(error)
     }
 }
+
+// checking if user is admin to display admin buttons in frontend
 
 exports.checkAdminStatus = async (req, res) => {
     const userData = await UserGroup.findOne({

@@ -6,6 +6,8 @@ const UserGroup = require('../models/userGroup')
 const User = require('../models/user')
 const GroupChat = require('../models/groupChat')
 
+// to get all users in group for checkbox
+
 exports.getGroupUsersExceptSelf = async (req, res) => {
     try {
         const users = await UserGroup.findAll({
@@ -29,6 +31,8 @@ exports.getGroupUsersExceptSelf = async (req, res) => {
         console.log(error)
     }
 }
+
+//get all non admins for checkbox
 
 exports.getGroupNonAdmins = async (req, res) => {
     try {
@@ -93,6 +97,8 @@ exports.createGroup = async (req, res) => {
     }
 }
 
+// to load to frontend
+
 exports.getGroups = async (req, res) => {
     const currentUserId = req.user.id
     const groups = []
@@ -145,6 +151,8 @@ exports.loadLiveGroupMessages = async (req, res) => {
     }
 }
 
+// adding members to group
+
 exports.addMembers = async (req, res) => {
     try {
         const selectedUserNames = req.body.selectedUserNames
@@ -174,6 +182,8 @@ exports.addMembers = async (req, res) => {
     }
 }
 
+// removing a member from group
+
 exports.deleteMembers = async (req, res) => {
     try {
         let selectedUserNames = req.query.selectedUserNames
@@ -189,7 +199,7 @@ exports.deleteMembers = async (req, res) => {
         })
 
         const userIds = users.map(user => user.id)
-        // console.log(dataForDeleting)
+
         await UserGroup.destroy({
             where: {
                 [Op.and]: [
@@ -203,6 +213,8 @@ exports.deleteMembers = async (req, res) => {
         console.log(error)
     }
 }
+
+// making new admins
 
 exports.makeAdmin = async (req, res) => {
     try {
@@ -218,8 +230,8 @@ exports.makeAdmin = async (req, res) => {
         })
 
         const userIds = users.map(user => user.id)
-        // console.log(dataForDeleting)
-        await UserGroup.update({isAdmin: true}, {
+
+        await UserGroup.update({ isAdmin: true }, {
             where: {
                 [Op.and]: [
                     { userId: userIds },

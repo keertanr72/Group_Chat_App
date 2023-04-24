@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const path = require('path')
 
 const cors = require('cors')
+const helmet = require('helmet')
 
 const UserRoute = require('./routes/user')
 const forgotPasswordRoute = require('./routes/forgotPassword')
@@ -64,6 +65,8 @@ app.use(cors({
     origin: ['http://127.0.0.1:5500'],
     credentials: true
 }))
+app.use(helmet())
+
 app.use('/image', imageRoute)
 
 app.use(bodyParser.urlencoded({ extended: true }))
