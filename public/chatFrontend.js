@@ -10,12 +10,13 @@ let userLiveListener = null
 
 socket.on('chatMessage', ({ chat, message }) => {
     console.log(`Received a message from ${chat}: ${message}`);
+    console.log(chat, 'mmmmmmmmmmmmmmmmmmmmmmmmmmmm')
     loadSocketMessagesFunction(chat.chat, chat.userId)
 });
 
 socket.on('groupChatMessage', ({ chat, message }) => {
-    console.log(chat.chat, parseInt(localStorage.getItem('currentTextingPerson')), chat.userName.userName, message)
-    loadGroupMessagesFunction(chat.chat, parseInt(localStorage.getItem('currentTextingPerson')), chat.userName.userName)
+    console.log(chat.chat, localStorage.getItem('currentTextingPerson'), chat.userName.userName, message)
+    loadGroupMessagesFunction(chat.chat, localStorage.getItem('currentTextingPerson'), chat.userName.userName)
 });
 
 document.addEventListener('submit', (event) => {
@@ -72,9 +73,8 @@ const sentMessageFunction = async () => {
 
         } else {
             const data = await axios.post(`http://localhost:3000/chat/create/?receiverId=${localStorage.getItem('currentTextingPerson')}`, { sentMessage, timeInMs: sentMessageTime.timeInMs, timeString: sentMessageTime.timeString }, { headers: { "Authorization": token } })
-            console.log(data.data.userId, parseInt(localStorage.getItem('currentTextingPerson')))
 
-            socket.emit('chatMessage', { from: data.data.userId, to: parseInt(localStorage.getItem('currentTextingPerson')), message: sentMessage, chat: data.data })
+            socket.emit('chatMessage', { from: data.data.userId, to: localStorage.getItem('currentTextingPerson'), message: sentMessage, chat: data.data })
         }
     } catch (error) {
         console.log(error)
@@ -143,7 +143,7 @@ const updateUserList = async () => {
         </div>`
         userList.appendChild(liElement)
         listOfUserTokens.push(`user_token_no_${userTokenNumber}`)
-        localStorage.setItem(`user_token_no_${userTokenNumber}`, user.id)
+        localStorage.setItem(`user_token_no_${userTokenNumber}`, user._id)
         userTokenNumber++
     }
 }
@@ -167,7 +167,7 @@ const updateGroupList = async () => {
             </div>`
             groupList.appendChild(liElement)
             listOfGroupTokens.push(`group_token_no_${groupTokenNumber}`)
-            localStorage.setItem(`group_token_no_${groupTokenNumber}`, group.id)
+            localStorage.setItem(`group_token_no_${groupTokenNumber}`, group._id)
             groupTokenNumber++
         }
     } catch (error) {
@@ -213,7 +213,7 @@ const addGroupListners = () => {
                 currentTextingPerson.textContent = groups[i].querySelector('.group-name').textContent
                 await loadPreviousGroupChats(localStorage.getItem(listOfGroupTokens[i]))
 
-                socket.emit('joinGroupChat', { groupId: parseInt(localStorage.getItem('currentTextingPerson')) })
+                socket.emit('joinGroupChat', { groupId: localStorage.getItem('currentTextingPerson') })
 
                 // groupLiveListener = setInterval(async () => {
                 //     const token = localStorage.getItem('token')
@@ -265,9 +265,7 @@ const addListners = () => {
                 currentTextingPerson.textContent = users[i].querySelector('.user-name').textContent
                 const currentUserId = await loadPreviousChats(localStorage.getItem(listOfUserTokens[i]))
 
-                console.log(currentUserId, parseInt(localStorage.getItem('currentTextingPerson')))
-
-                socket.emit('joinChat', { from: currentUserId, to: parseInt(localStorage.getItem('currentTextingPerson')) }, () => {
+                socket.emit('joinChat', { from: currentUserId, to: localStorage.getItem('currentTextingPerson') }, () => {
                     console.log('socket emit connection')
                 });
 
@@ -295,7 +293,6 @@ const loadPreviousGroupChats = async (groupId) => {
         let recentReceivedChat
         const token = localStorage.getItem('token')
         const chats = await axios.get(`http://localhost:3000/group/load-previous-group-chats/?groupId=${groupId}`, { headers: { "Authorization": token } })
-        console.log(chats)
         const currentUserId = chats.data.userId
         for (let chat of chats.data.chats) {
             loadGroupMessagesFunction(chat, currentUserId, chat.user.userName)
@@ -303,7 +300,6 @@ const loadPreviousGroupChats = async (groupId) => {
                 recentReceivedChat = chat
             }
         }
-        console.log(recentReceivedChat)
         if (recentReceivedChat) {
             localStorage.setItem('recentReceivedChat', JSON.stringify(recentReceivedChat))
         } else {
@@ -352,12 +348,11 @@ const loadMessagesFunction = (chat, currentUserId) => {
     divElement.className = 'message-info'
     const spanElement = document.createElement('span')
     spanElement.textContent = chat.timeString
-
     divElement.appendChild(spanElement)
     newMessageListItem.appendChild(newParagraph)
     newMessageListItem.appendChild(divElement)
     messageList.appendChild(newMessageListItem);
-    if (currentUserId === chat.userId) {
+    if (currentUserId == chat.userId) {
         newMessageListItem.className = 'message sent'
         spanElement.className = 'message-time-right'
     } else {
@@ -377,7 +372,7 @@ const loadSocketMessagesFunction = (chat, currentUserId) => {
     divElement.className = 'message-info'
     const spanElement = document.createElement('span')
     spanElement.textContent = chat.timeString
-
+    console.log(chat.userId, currentUserId, '????????????????????????????????????')
     divElement.appendChild(spanElement)
     newMessageListItem.appendChild(newParagraph)
     newMessageListItem.appendChild(divElement)

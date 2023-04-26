@@ -1,30 +1,51 @@
-const Sequelize = require('sequelize')
+const { ObjectId } = require('mongodb');
 
-const sequelize = require('../util/database')
+const getDb = require('../util/database').getDb
 
-const OneToOneChat = sequelize.define('OneToOneChat', {
-    id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    receiverId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    },
-    message: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    timeInMs: {
-        type: Sequelize.BIGINT,
-        allowNull: false
-    },
-    timeString: {
-        type: Sequelize.STRING,
-        allowNull: false
+
+class OneToOneChat {
+    constructor(receiverId, message, timeInMs, timeString, userId) {
+        this.receiverId = receiverId
+        this.message = message
+        this.timeInMs = timeInMs
+        this.timeString = timeString
+        this.userId = userId
     }
-})
+
+    save() {
+        const db = getDb()
+        return db.collection('oneToOneChats')
+            .insertOne(this)
+            .then((result) => {
+                console.log(result)
+            }).catch((err) => {
+                console.log(err)
+            });
+    }
+
+    static getPreviousChats(receiverId, loggedUserID) {
+        const db = getDb()
+        return db.collection('oneToOneChats')
+            .find({
+                $or: [
+                    {
+                        receiverId: receiverId,
+                        userId: loggedUserID
+                    },
+                    {
+                        receiverId: loggedUserID,
+                        userId: receiverId
+                    }
+                ]
+            })
+            .toArray()
+            .then((result) => {
+                console.log(result, receiverId, loggedUserID)
+                return result
+            }).catch((err) => {
+                console.log(err)                
+            });
+    }
+}
 
 module.exports = OneToOneChat

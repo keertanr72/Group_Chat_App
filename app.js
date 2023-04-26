@@ -8,7 +8,7 @@ const helmet = require('helmet')
 
 const UserRoute = require('./routes/user')
 const forgotPasswordRoute = require('./routes/forgotPassword')
-// const chatRoute = require('./routes/chat')
+const chatRoute = require('./routes/chat')
 // const groupRoute = require('./routes/group')
 // const imageRoute = require('./routes/image')
 
@@ -51,6 +51,8 @@ io.on('connection', (socket) => {
 
 function getRoomName(from, to) {
     // Generate a unique name for the chat room
+    const roomName = [from, to].sort().join('_')
+    console.log(roomName)
     return `${Math.min(from, to)}:${Math.max(from, to)}`;
 }
 
@@ -70,7 +72,7 @@ app.use('/user', UserRoute)
 
 app.use('/password', forgotPasswordRoute)
 
-// app.use('/chat', chatRoute)
+app.use('/chat', chatRoute)
 
 // app.use('/group', groupRoute)
 
