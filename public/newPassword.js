@@ -12,13 +12,12 @@ const changePassword = async (event) => {
     try {
         const update = await axios.patch('http://localhost:3000/password/update-password', {email, password: newPassword})
     if(update.status === 200){
+        alert('success')
         window.location.href = "/public/login.html"
     }
     } catch (error) {
         console.log(error)
-        if(!error.response.data.success) {
             alert('User Doesnt Exist')
-        }
     }
 }
 

@@ -10,8 +10,6 @@ const router = express()
 
 router.post('/', upload.single('selectedFile'), userAuthenticationController.userAuthentication, imageController.postToS3)
 
-// router.post('/', upload.single('selectedFile'), imageController.postToS3)
-
 router.get('/:key', imageController.getFromS3)
 
 module.exports = router

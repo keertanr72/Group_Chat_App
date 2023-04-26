@@ -7,7 +7,7 @@ const cors = require('cors')
 const helmet = require('helmet')
 
 const UserRoute = require('./routes/user')
-// const forgotPasswordRoute = require('./routes/forgotPassword')
+const forgotPasswordRoute = require('./routes/forgotPassword')
 // const chatRoute = require('./routes/chat')
 // const groupRoute = require('./routes/group')
 // const imageRoute = require('./routes/image')
@@ -68,7 +68,7 @@ app.use(bodyParser.json())
 
 app.use('/user', UserRoute)
 
-// app.use('/password', forgotPasswordRoute)
+app.use('/password', forgotPasswordRoute)
 
 // app.use('/chat', chatRoute)
 

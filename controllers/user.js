@@ -8,20 +8,14 @@ const { send } = require('process')
 
 // geting users for frontend
 
-// exports.getUsersExceptSelf = async (req, res) => {
-//     try {
-//         const users = await User.findAll({
-//             where: {
-//                 userName: {
-//                     [Op.notIn]: [req.user.userName]
-//                 }
-//             }
-//         })
-//         res.json({ users })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+exports.getUsersExceptSelf = async (req, res) => {
+    try {
+        const users = await User.fetchAllExceptSelf(req.user[0]._id)
+        res.json({ users })
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 // // getting users to add to group
 
@@ -50,22 +44,22 @@ const { send } = require('process')
 //     }
 // }
 
-// // checking if email exists
+// checking if email exists
 
-// exports.checkUser = async (req, res, next) => {
-//     try {
-//         const email = req.body.email
-//         const userDetails = await User.findOne({ where: { email }, attributes: ['email'] })
-//         if (userDetails) {
-//             res.status(404).send({ message: 'user exists', success: false })
-//         }
-//         else {
-//             next()
-//         }
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+exports.checkUser = async (req, res, next) => {
+    try {
+        const email = req.body.email
+        const userDetails = await User.findByEmail(email)
+        if (userDetails.length) {
+            res.status(404).send({ message: 'user exists', success: false })
+        }
+        else {
+            next()
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 exports.createUser = async (req, res) => {
     try {
@@ -75,15 +69,9 @@ exports.createUser = async (req, res) => {
             if (error) {
                 console.error('Error hashing password:', error);
             } else {
-                // await User.create({
-                //     userName,
-                //     email,
-                //     phoneNumber,
-                //     password: hash
-                // })
-                const user = new User(userName, email, phoneNumber, password)
+                const user = new User(userName, email, phoneNumber, hash)
                 const savedData = await user.save()
-                console.log(savedData, '//////////////////////////////////////////////////')
+                console.log(savedData)
             }
         })
         res.json({ success: true })
@@ -92,32 +80,33 @@ exports.createUser = async (req, res) => {
     }
 }
 
-// const generateToken = (userDetails) => {
-//     return jwt.sign({ userDetails }, 'secretKey')
-// }
+const generateToken = (userDetails) => {
+    return jwt.sign({ userDetails }, 'secretKey')
+}
 
-// exports.userLogin = async (req, res) => {
-//     try {
-//         const { email, password } = req.body
-//         const userDetails = await User.findOne({ where: { email } })
-//         if (!userDetails) {
-//             res.status(403).send({ message: "user doesn't exists", success: false })
-//         } else {
-//             bcrypt.compare(password, userDetails.password, function (err, result) {
-//                 if (err) {
-//                     console.log(err);
-//                 } else {
-//                     if (result)
-//                         res.status(200).send({ message: "user exists", success: true, token: generateToken(userDetails) })
-//                     else
-//                         res.status(404).send({ message: "wrong password", success: false })
-//                 }
-//             });
-//         }
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+exports.userLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body
+        const userDetails = await User.findByEmail(email)
+        console.log(userDetails)
+        if (userDetails.length === 0) {
+            res.status(403).send({ message: "user doesn't exists", success: false })
+        } else {
+            bcrypt.compare(password, userDetails[0].password, function (err, result) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    if (result)
+                        res.status(200).send({ message: "user exists", success: true, token: generateToken(userDetails) })
+                    else
+                        res.status(404).send({ message: "wrong password", success: false })
+                }
+            });
+        }
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 // // checking if user is admin to display admin buttons in frontend
 
