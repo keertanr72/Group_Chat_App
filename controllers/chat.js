@@ -1,5 +1,8 @@
+const { ObjectId } = require('mongodb');
+
 const OneToOneChat = require('../models/oneToOneChat')
 const User = require('../models/user')
+const Group = require('../models/group')
 
 // const Group = require('../models/group')
 // const UserGroup = require('../models/userGroup')
@@ -25,61 +28,46 @@ exports.createChat = async (req, res) => {
     }
 }
 
-// exports.createLinkChat = async (req, res) => {
-//     try {
-//         const selectedUserNames = req.body.selectedUserNames
-//         const message = req.body.sentMessage
-//         const timeInMs = req.body.timeInMs
-//         const timeString = req.body.timeString
+exports.createLinkChat = async (req, res) => {
+    try {
+        const selectedUserNames = req.body.selectedUserNames
+        const message = req.body.sentMessage
+        const timeInMs = req.body.timeInMs
+        const timeString = req.body.timeString
 
-//         const users = await User.findAll({
-//             attributes: ['id'],
-//             where: {
-//                 userName: {
-//                     [Op.in]: selectedUserNames
-//                 }
-//             }
-//         });
-//         console.log(users)
-//         const dataToCreate = users.map(user => {
-//             const data = {
-//                 receiverId: req.user.id,
-//                 message: message + `&currentTextingPerson=${user.id}`,
-//                 timeInMs,
-//                 timeString,
-//                 userId: user.id
-//             }
-//             return data
-//         });
-//         console.log(dataToCreate)
-//         await OneToOneChat.bulkCreate(dataToCreate)
-//         res.json({ success: true })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+        const users = await User.findByUserNames(selectedUserNames)
+        users.forEach(async (user) => {
+            const userChat = new OneToOneChat(user._id, `${message}&currentTextingPerson=${user._id}`, timeInMs, timeString, req.user[0]._id)
+            await userChat.save()
+        })
+        res.json({ success: true })
+    } catch (error) {
+        console.log(error)
+    }
+}
 
-// exports.createGroupChat = async (req, res) => {
-//     try {
-//         const groupId = req.query.groupId
-//         const message = req.body.sentMessage
-//         const timeInMs = req.body.timeInMs
-//         const timeString = req.body.timeString
-//         const chat = await GroupChat.create({
-//             message,
-//             timeInMs,
-//             timeString,
-//             userId: req.user.id,
-//             groupId
-//         })
-//         const userName = await User.findByPk(req.user.id, {
-//             attributes: ['userName']
-//         })
-//         res.json({ success: true, chat, userName })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+exports.createGroupChat = async (req, res) => {
+    try {
+        const groupId = req.query.groupId
+        const message = req.body.sentMessage
+        const timeInMs = req.body.timeInMs
+        const timeString = req.body.timeString
+        console.log(groupId)
+        const chat = await Group.createChat(groupId, {
+            message,
+            timeInMs,
+            timeString,
+            userName: req.user[0].userName,
+            userId: new ObjectId(req.user[0]._id),
+            groupId: new ObjectId(groupId)
+        })
+        const userName = await User.findById(req.user[0]._id)
+        console.log(userName[0].userName)
+        res.json({ success: true, chat, userName: userName[0].userName })
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 exports.loadPreviousChats = async (req, res) => {
     try {

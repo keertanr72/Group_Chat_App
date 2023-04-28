@@ -23,6 +23,6 @@ router.put('/make-admin', userAuthenticationController.userAuthentication, group
 
 router.get('/invite-link-click', groupController.inviteLinkClick)
 
-router.get('/load-live-group-messages', userAuthenticationController.userAuthentication, groupController.loadLiveGroupMessages)
+// router.get('/load-live-group-messages', userAuthenticationController.userAuthentication, groupController.loadLiveGroupMessages)
 
 module.exports = router

@@ -21,6 +21,36 @@ class User {
             });
     }
 
+    static getNewUsers(userIds) {
+        const db = getDb()
+        return db
+            .collection('users')
+            .find({ _id: { $nin: userIds } })
+            .toArray()
+            .then(users => {
+                // console.log(users)
+                return users
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+
+    static getUsersById(userIds) {
+        const db = getDb()
+        return db
+            .collection('users')
+            .find({ _id: { $in: userIds } })
+            .toArray()
+            .then(users => {
+                // console.log(users)
+                return users
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+
     static fetchAllExceptSelf(userId) {
         const db = getDb()
         return db
@@ -34,6 +64,34 @@ class User {
             .catch(err => {
                 console.log(err)
             })
+    }
+
+    static findById(userId) {
+        const db = getDb()
+        return db
+            .collection('users')
+            .find({ _id: new ObjectId(userId) })
+            .toArray()
+            .then((result) => {
+                // console.log(result)
+                return result
+            }).catch((err) => {
+                console.log(err)
+            });
+    }
+
+    static findByUserNames(userName) {
+        const db = getDb()
+        return db
+            .collection('users')
+            .find({ userName: { $in: userName } })
+            .toArray()
+            .then((result) => {
+                // console.log(result)
+                return result
+            }).catch((err) => {
+                console.log(err)
+            });
     }
 
     static findByEmail(email) {
@@ -55,7 +113,7 @@ class User {
         return db.collection('users')
             .updateOne({ _id: new ObjectId(_id) }, { $set: { password } })
             .then(result => {
-                console.log(result, _id, password, 'woehfoiehniew.............................fpewijfewipj');
+                // console.log(result, _id, password);
                 return result;
             })
             .catch(err => {

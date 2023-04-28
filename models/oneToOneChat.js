@@ -5,11 +5,11 @@ const getDb = require('../util/database').getDb
 
 class OneToOneChat {
     constructor(receiverId, message, timeInMs, timeString, userId) {
-        this.receiverId = receiverId
+        this.receiverId = new ObjectId(receiverId)
         this.message = message
         this.timeInMs = timeInMs
         this.timeString = timeString
-        this.userId = userId
+        this.userId = new ObjectId(userId)
     }
 
     save() {
@@ -29,15 +29,16 @@ class OneToOneChat {
             .find({
                 $or: [
                     {
-                        receiverId: receiverId,
-                        userId: loggedUserID
+                        receiverId: new ObjectId(receiverId),
+                        userId: new ObjectId(loggedUserID)
                     },
                     {
-                        receiverId: loggedUserID,
-                        userId: receiverId
+                        receiverId: new ObjectId(loggedUserID),
+                        userId: new ObjectId(receiverId)
                     }
                 ]
             })
+            .sort({ timeInMs: 1 })
             .toArray()
             .then((result) => {
                 console.log(result, receiverId, loggedUserID)

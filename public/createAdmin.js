@@ -5,8 +5,8 @@ window.addEventListener('load', async () => {
     for (let user of users.data.users) {
         divElement.innerHTML +=
         `
-            <input type="checkbox" name="member" value="${user.user.userName}">
-            <label for="${user.user.userName}">${user.user.userName}</label><br>
+            <input type="checkbox" name="member" value="${user.userName}">
+            <label for="${user.userName}">${user.userName}</label><br>
         `
     }
 });

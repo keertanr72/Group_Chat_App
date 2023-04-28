@@ -9,8 +9,8 @@ const helmet = require('helmet')
 const UserRoute = require('./routes/user')
 const forgotPasswordRoute = require('./routes/forgotPassword')
 const chatRoute = require('./routes/chat')
-// const groupRoute = require('./routes/group')
-// const imageRoute = require('./routes/image')
+const groupRoute = require('./routes/group')
+const imageRoute = require('./routes/image')
 
 const errorController = require('./controllers/error')
 
@@ -62,7 +62,7 @@ app.use(cors({
 }))
 app.use(helmet())
 
-// app.use('/image', imageRoute)
+app.use('/image', imageRoute)
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -74,9 +74,9 @@ app.use('/password', forgotPasswordRoute)
 
 app.use('/chat', chatRoute)
 
-// app.use('/group', groupRoute)
+app.use('/group', groupRoute)
 
-// app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 mongoConnect(() => {
     http.listen(3000)

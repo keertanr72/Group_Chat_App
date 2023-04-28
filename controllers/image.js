@@ -5,12 +5,13 @@ const util = require('util')
 const unlinkFile = util.promisify(fs.unlink)
 
 const OneToOneChat = require('../models/oneToOneChat')
-const GroupChat = require('../models/groupChat')
+const Group = require('../models/group')
 
 exports.getFromS3 = (req, res) => {
     console.log(req.params)
     const key = req.params.key
     const readStream = getFileStream(key)
+    res.setHeader('Content-Type', 'image/png')
     readStream.pipe(res)
 }
 
@@ -24,11 +25,12 @@ exports.postToS3 = async (req, res) => {
             const message = `http://localhost:3000/image/${result.Key}`
             const timeInMs = req.query.timeInMs
             const timeString = req.query.timeString
-            const chat = await GroupChat.create({
+            const chat = await Group.createChat(groupId, {
                 message,
                 timeInMs,
                 timeString,
-                userId: req.user.id,
+                userName: req.user[0].userName,
+                userId: req.user[0]._id,
                 groupId
             })
         } else {
@@ -36,13 +38,14 @@ exports.postToS3 = async (req, res) => {
             const message = `http://localhost:3000/image/${result.Key}`
             const timeInMs = req.query.timeInMs
             const timeString = req.query.timeString
-            const chat = await OneToOneChat.create({
+            const chat = new OneToOneChat(
                 receiverId,
                 message,
                 timeInMs,
                 timeString,
-                userId: req.user.id
-            })
+                req.user[0]._id
+            )
+            chat.save()
         }
         res.json({ imagePath: `http://localhost:3000/image/${result.Key}` })
     } catch (error) {

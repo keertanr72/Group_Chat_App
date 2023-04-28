@@ -1,8 +1,10 @@
+const { ObjectId } = require('mongodb');
+
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user')
-// const UserGroup = require('../models/userGroup')
+const Group = require('../models/group')
 
 const { send } = require('process')
 
@@ -17,32 +19,18 @@ exports.getUsersExceptSelf = async (req, res) => {
     }
 }
 
-// // getting users to add to group
+// getting users to add to group
 
-// exports.getNewUsersExceptSelf = async (req, res) => {
-//     try {
-//         const presentUserIds = []
-//         const groupId = req.query.groupId
-//         const presentUsers = await UserGroup.findAll({ where: { groupId }, attributes: ['userId'] })
-//         presentUsers.forEach(user => {
-//             presentUserIds.push(user.userId)
-//         });
-
-//         const users = await User.findAll({
-//             where: {
-//                 userName: {
-//                     [Op.notIn]: [req.user.userName]
-//                 },
-//                 id: {
-//                     [Op.notIn]: presentUserIds
-//                 }
-//             }
-//         })
-//         res.json({ users })
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
+exports.getNewUsersExceptSelf = async (req, res) => {
+    try {
+        const groupId = req.query.groupId
+        const presentUserIds = await Group.getUsersInGroup(groupId)
+        const users = await User.getNewUsers(presentUserIds)
+        res.json({ users })
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 // checking if email exists
 
@@ -108,15 +96,10 @@ exports.userLogin = async (req, res) => {
     }
 }
 
-// // checking if user is admin to display admin buttons in frontend
+// checking if user is admin to display admin buttons in frontend
 
-// exports.checkAdminStatus = async (req, res) => {
-//     const userData = await UserGroup.findOne({
-//         where: {
-//             userId: req.user.id,
-//             groupId: parseInt(req.query.currentTextingPerson)
-//         },
-//         attributes: ['isAdmin']
-//     })
-//     res.json({ userData })
-// }
+exports.checkAdminStatus = async (req, res) => {
+    const userData = await Group.checkAdmin(req.query.currentTextingPerson, req.user[0]._id)
+    console.log(userData)
+    res.json({ userData })
+}

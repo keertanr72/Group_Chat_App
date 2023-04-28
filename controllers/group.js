@@ -1,31 +1,15 @@
-const { Op } = require("sequelize");
-const sequelize = require('../util/database')
+const { ObjectId } = require('mongodb');
 
 const Group = require('../models/group')
-const UserGroup = require('../models/userGroup')
 const User = require('../models/user')
-const GroupChat = require('../models/groupChat')
 
 // to get all users in group for checkbox
 
 exports.getGroupUsersExceptSelf = async (req, res) => {
     try {
-        const users = await UserGroup.findAll({
-            where: {
-                userId: {
-                    [Op.notIn]: [req.user.id]
-                },
-                groupId: {
-                    [Op.in]: [parseInt(req.query.groupId)]
-                }
-            },
-            include: [
-                {
-                    model: User,
-                    attributes: ['userName']
-                }
-            ]
-        })
+        const presentUsers = await Group.getUsersInGroup(req.query.groupId)
+        const presentUserIdsExceptSelf = presentUsers.filter(element => element.toString() !== req.user[0]._id)
+        const users = await User.getUsersById(presentUserIdsExceptSelf)
         res.json({ users })
     } catch (error) {
         console.log(error)
@@ -36,23 +20,15 @@ exports.getGroupUsersExceptSelf = async (req, res) => {
 
 exports.getGroupNonAdmins = async (req, res) => {
     try {
-        const users = await UserGroup.findAll({
-            where: {
-                userId: {
-                    [Op.notIn]: [req.user.id]
-                },
-                groupId: {
-                    [Op.in]: [parseInt(req.query.groupId)]
-                },
-                isAdmin: false
-            },
-            include: [
-                {
-                    model: User,
-                    attributes: ['userName']
-                }
-            ]
+        const presentUsersInGroup = await Group.getUsersInGroup(req.query.groupId)
+        const presentAdminsInGroup = await Group.getAdminsInGroup(req.query.groupId)
+        const presentUsersInGroup1 = presentUsersInGroup.map(element => element.toString())
+        const presentAdminsInGroup1 = presentAdminsInGroup.map(element => element.toString())
+        const nonAdmins = presentUsersInGroup1.filter(element => {
+            return !presentAdminsInGroup1.includes(element)
         })
+        const nonAdmins1 = nonAdmins.map(element => new ObjectId(element))
+        const users = await User.getUsersById(nonAdmins1)
         res.json({ users })
     } catch (error) {
         console.log(error)
@@ -61,38 +37,29 @@ exports.getGroupNonAdmins = async (req, res) => {
 
 exports.createGroup = async (req, res) => {
     try {
-        const transaction = await sequelize.transaction()
         const groupName = req.body.groupName
         const selectedUserNames = req.body.selectedUserNames
-        const createdBy = req.user.userName
-        const groupData = await Group.create({
-            groupName,
-            createdBy
-        })
-        const UserDetails = await User.findAll({
-            where: {
-                userName: {
-                    [Op.in]: selectedUserNames
-                }
-            }
-        })
-        for (let user of UserDetails) {
-            await UserGroup.create({
-                userId: user.id,
-                groupId: groupData.id,
-                isAdmin: false
-            }, { transaction })
-        }
+        const createdBy = req.user[0].userName
 
-        await UserGroup.create({
-            userId: req.user.id,
-            groupId: groupData.id,
-            isAdmin: true
-        }, { transaction })
-        await transaction.commit()
+        const UserDetails = await User.findByUserNames(selectedUserNames)
+
+        const userIds = UserDetails.map(element => {
+            return element._id
+        })
+
+        userIds.push(new ObjectId(req.user[0]._id))
+
+        const groupData = new Group(
+            groupName,
+            createdBy,
+            [new ObjectId(req.user[0]._id)],
+            userIds
+        )
+
+        await groupData.save()
+
         res.json({ groupName, createdBy })
     } catch (error) {
-        await transaction.rollback()
         console.log(error)
     }
 }
@@ -100,56 +67,44 @@ exports.createGroup = async (req, res) => {
 // to load to frontend
 
 exports.getGroups = async (req, res) => {
-    const currentUserId = req.user.id
-    const groups = []
-    const groupData = await UserGroup.findAll({ where: { userId: currentUserId }, attributes: ['groupId'] })
-    for (let group of groupData) {
-        const data = await Group.findByPk(group.groupId)
-        groups.push(data)
-    }
+    const currentUserId = req.user[0]._id
+    const groups = await Group.getUsersGroups(currentUserId)
     res.json({ groups, success: true })
 }
 
 exports.loadPreviousGroupChats = async (req, res) => {
     try {
         const groupId = req.query.groupId
-        const chats = await GroupChat.findAll({
-            where: { groupId },
-            order: [['timeInMs', 'ASC']],
-            include: [{
-                model: User,
-                attributes: ['userName']
-            }]
-        })
-        res.json({ chats, userId: req.user.id })
+        const chats = await Group.getPreviousMessages(groupId)
+        res.json({ chats, userId: req.user[0]._id })
     } catch (error) {
         console.log(error)
     }
 }
 
-exports.loadLiveGroupMessages = async (req, res) => {
-    try {
-        const groupId = req.query.groupId
-        const timeInMs = req.query.timeInMs
-        const chats = await GroupChat.findAll(
-            {
-                where: {
-                    [Op.and]: [
-                        { groupId },
-                        { timeInMs: { [Op.gt]: timeInMs } }
-                    ]
-                },
-                order: [['timeInMs', 'ASC']],
-                include: [{
-                    model: User,
-                    attributes: ['userName']
-                }]
-            })
-        res.json({ chats, userId: req.user.id })
-    } catch (error) {
-        console.log(error)
-    }
-}
+// exports.loadLiveGroupMessages = async (req, res) => {
+//     try {
+//         const groupId = req.query.groupId
+//         const timeInMs = req.query.timeInMs
+//         const chats = await GroupChat.findAll(
+//             {
+//                 where: {
+//                     [Op.and]: [
+//                         { groupId },
+//                         { timeInMs: { [Op.gt]: timeInMs } }
+//                     ]
+//                 },
+//                 order: [['timeInMs', 'ASC']],
+//                 include: [{
+//                     model: User,
+//                     attributes: ['userName']
+//                 }]
+//             })
+//         res.json({ chats, userId: req.user.id })
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
 
 // adding members to group
 
@@ -157,25 +112,9 @@ exports.addMembers = async (req, res) => {
     try {
         const selectedUserNames = req.body.selectedUserNames
         const groupId = req.query.groupId
-        const users = await User.findAll({
-            attributes: ['id'],
-            where: {
-                userName: {
-                    [Op.in]: selectedUserNames
-                }
-            }
-        })
-
-        const dataForCreating = users.map((user) => {
-            const data = {
-                isAdmin: false,
-                userId: user.id,
-                groupId: parseInt(groupId)
-            }
-            return data
-        })
-        console.log(dataForCreating)
-        await UserGroup.bulkCreate(dataForCreating)
+        const users = await User.findByUserNames(selectedUserNames)
+        const userIds = users.map(user => user._id)
+        await Group.addUsersToGroup(groupId ,userIds)
         res.json({ success: true })
     } catch (error) {
         console.log(error)
@@ -189,25 +128,9 @@ exports.deleteMembers = async (req, res) => {
         let selectedUserNames = req.query.selectedUserNames
         selectedUserNames = selectedUserNames.split(',')
         const groupId = req.query.groupId
-        const users = await User.findAll({
-            attributes: ['id'],
-            where: {
-                userName: {
-                    [Op.in]: selectedUserNames
-                }
-            }
-        })
-
-        const userIds = users.map(user => user.id)
-
-        await UserGroup.destroy({
-            where: {
-                [Op.and]: [
-                    { userId: userIds },
-                    { groupId }
-                ]
-            }
-        })
+        const users = await User.findByUserNames(selectedUserNames)
+        const userIds = users.map(user => user._id)
+        await Group.deleteUsersFromGroup(groupId ,userIds)
         res.json({ success: true })
     } catch (error) {
         console.log(error)
@@ -220,25 +143,9 @@ exports.makeAdmin = async (req, res) => {
     try {
         let selectedUserNames = req.body.selectedUserNames
         const groupId = req.query.groupId
-        const users = await User.findAll({
-            attributes: ['id'],
-            where: {
-                userName: {
-                    [Op.in]: selectedUserNames
-                }
-            }
-        })
-
-        const userIds = users.map(user => user.id)
-
-        await UserGroup.update({ isAdmin: true }, {
-            where: {
-                [Op.and]: [
-                    { userId: userIds },
-                    { groupId }
-                ]
-            }
-        })
+        const users = await User.findByUserNames(selectedUserNames)
+        const userIds = users.map(user => user._id)
+        await Group.makeUsersAdmin(groupId ,userIds)
         res.json({ success: true })
     } catch (error) {
         console.log(error)
@@ -248,11 +155,7 @@ exports.makeAdmin = async (req, res) => {
 exports.inviteLinkClick = async (req, res) => {
     try {
         const groupId = req.query.groupId
-        await UserGroup.create({
-            isAdmin: false,
-            userId: parseInt(req.query.currentTextingPerson),
-            groupId: parseInt(groupId)
-        })
+        await Group.addUsersToGroup(groupId ,[new ObjectId(req.query.currentTextingPerson)])
         res.json({ success: true })
     } catch (error) {
         console.log(error)
