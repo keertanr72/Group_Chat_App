@@ -12,7 +12,7 @@ const { send } = require('process')
 
 exports.getUsersExceptSelf = async (req, res) => {
     try {
-        const users = await User.fetchAllExceptSelf(req.user[0]._id)
+        const users = await User.find({ _id: { $ne: req.user._id } })
         res.json({ users })
     } catch (error) {
         console.log(error)
@@ -24,8 +24,9 @@ exports.getUsersExceptSelf = async (req, res) => {
 exports.getNewUsersExceptSelf = async (req, res) => {
     try {
         const groupId = req.query.groupId
-        const presentUserIds = await Group.getUsersInGroup(groupId)
-        const users = await User.getNewUsers(presentUserIds)
+        const presentUserIds = await Group.findById(groupId)
+        const users = await User.find({ _id: { $nin: presentUserIds.userIds } })
+        // console.log(users)
         res.json({ users })
     } catch (error) {
         console.log(error)
@@ -37,8 +38,8 @@ exports.getNewUsersExceptSelf = async (req, res) => {
 exports.checkUser = async (req, res, next) => {
     try {
         const email = req.body.email
-        const userDetails = await User.findByEmail(email)
-        if (userDetails.length) {
+        const userDetails = await User.findOne({ email })
+        if (userDetails) {
             res.status(404).send({ message: 'user exists', success: false })
         }
         else {
@@ -57,9 +58,13 @@ exports.createUser = async (req, res) => {
             if (error) {
                 console.error('Error hashing password:', error);
             } else {
-                const user = new User(userName, email, phoneNumber, hash)
-                const savedData = await user.save()
-                console.log(savedData)
+                const user = new User({
+                    userName, 
+                    email, 
+                    phoneNumber, 
+                    password: hash
+                })
+                await user.save()
             }
         })
         res.json({ success: true })
@@ -75,12 +80,11 @@ const generateToken = (userDetails) => {
 exports.userLogin = async (req, res) => {
     try {
         const { email, password } = req.body
-        const userDetails = await User.findByEmail(email)
-        console.log(userDetails)
-        if (userDetails.length === 0) {
+        const userDetails = await User.findOne({ email })
+        if (!userDetails) {
             res.status(403).send({ message: "user doesn't exists", success: false })
         } else {
-            bcrypt.compare(password, userDetails[0].password, function (err, result) {
+            bcrypt.compare(password, userDetails.password, function (err, result) {
                 if (err) {
                     console.log(err);
                 } else {
@@ -99,7 +103,6 @@ exports.userLogin = async (req, res) => {
 // checking if user is admin to display admin buttons in frontend
 
 exports.checkAdminStatus = async (req, res) => {
-    const userData = await Group.checkAdmin(req.query.currentTextingPerson, req.user[0]._id)
-    console.log(userData)
+    const userData = await Group.findOne({ _id: new ObjectId(req.query.currentTextingPerson), admins: new ObjectId(req.user._id) })
     res.json({ userData })
 }

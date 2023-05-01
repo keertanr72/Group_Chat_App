@@ -14,7 +14,7 @@ const imageRoute = require('./routes/image')
 
 const errorController = require('./controllers/error')
 
-const mongoConnect = require('./util/database').mongoConnect
+const mongoose = require('mongoose')
 
 const app = express()
 
@@ -78,6 +78,11 @@ app.use('/group', groupRoute)
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-mongoConnect(() => {
-    http.listen(3000)
-})
+mongoose.connect('mongodb+srv://keertan:keertan@cluster0.9m5vdch.mongodb.net/groupchatappmongoose?retryWrites=true&w=majority')
+    .then((result) => {
+        console.log('connected')
+        http.listen(3000)
+    }).catch((err) => {
+        console.log(err)
+    });
+

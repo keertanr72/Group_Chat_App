@@ -6,8 +6,8 @@ const router = express()
 
 router.post('/forgot-password', forgotPasswordController.forgotPassword)
 
-router.patch('/update-password', forgotPasswordController.updatePassword)
-
 router.get('/forgot-password/:id', forgotPasswordController.getOnLinkClick)
+
+router.patch('/update-password', forgotPasswordController.updatePassword)
 
 module.exports = router

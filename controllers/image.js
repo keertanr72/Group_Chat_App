@@ -25,26 +25,30 @@ exports.postToS3 = async (req, res) => {
             const message = `http://localhost:3000/image/${result.Key}`
             const timeInMs = req.query.timeInMs
             const timeString = req.query.timeString
-            const chat = await Group.createChat(groupId, {
-                message,
-                timeInMs,
-                timeString,
-                userName: req.user[0].userName,
-                userId: req.user[0]._id,
-                groupId
+            const chat = await Group.findByIdAndUpdate(groupId, {
+                $push: {
+                    messages: {
+                        message,
+                        timeInMs,
+                        timeString,
+                        userName: req.user.userName,
+                        userId: req.user._id,
+                        groupId
+                    }
+                }
             })
         } else {
             const receiverId = req.query.receiverId
             const message = `http://localhost:3000/image/${result.Key}`
             const timeInMs = req.query.timeInMs
             const timeString = req.query.timeString
-            const chat = new OneToOneChat(
+            const chat = new OneToOneChat({
                 receiverId,
                 message,
                 timeInMs,
                 timeString,
-                req.user[0]._id
-            )
+                userId: req.user._id
+            })
             chat.save()
         }
         res.json({ imagePath: `http://localhost:3000/image/${result.Key}` })

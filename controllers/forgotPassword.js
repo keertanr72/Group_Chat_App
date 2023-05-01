@@ -2,7 +2,6 @@ const Sib = require('sib-api-v3-sdk')
 const { v4: uuidv4 } = require('uuid')
 require('dotenv').config()
 const bcrypt = require('bcrypt')
-const { ObjectId } = require('mongodb');
 
 const ForgotPassword = require('../models/forgotPassword')
 const User = require('../models/user')
@@ -32,9 +31,13 @@ exports.forgotPassword = async (req, res) => {
         })
         const userData = User.findByEmail(email)
         const promiseArray = await Promise.all([p1, userData])
-        if (userData.length === 0)
+        if (!userData)
             res.status(403).json({ message: 'user doesnt exist' })
-        const ForgotPasswordDetails = new ForgotPassword(idOfForgotPassword, true, promiseArray[1][0]._id.toString())
+        const ForgotPasswordDetails = new ForgotPassword({
+            forgotPasswordId: idOfForgotPassword,
+            isActive: true,
+            userId: promiseArray[1]._id.toString()
+        })
         ForgotPasswordDetails.save()
         res.status(200).json({ message: 'successfull' })
     } catch (error) {
@@ -46,9 +49,9 @@ exports.forgotPassword = async (req, res) => {
 exports.getOnLinkClick = async (req, res) => {
     try {
         const forgotPasswordId = req.params.id
-        const data = await ForgotPassword.checkIsActive(forgotPasswordId)
-        if(data) {
-            await ForgotPassword.updateIsActive(forgotPasswordId)
+        const data = await ForgotPassword.findOne({ forgotPasswordId })
+        if(data.isActive) {
+            await ForgotPassword.updateOne({ forgotPasswordId }, { isActive: false })
             res.redirect('http://127.0.0.1:5500/public/newPassword.html')
         } else {
             res.redirect('http://127.0.0.1:5500/public/error.html')
@@ -60,19 +63,15 @@ exports.getOnLinkClick = async (req, res) => {
 
 exports.updatePassword = async (req, res) => {
     try {
-
         const {email, password} = req.body
-        const data = await User.findByEmail(email)
-        console.log(data[0]._id.toString(), '//////////////////////')
-        if(data.length === 0){
+        const data = await User.findOne({ email })
+        if(!data){
             res.status(404).json({success: false})
         } else {
             bcrypt.hash(password, 10, async (err, hash) => {
                 if(err)
                 console.log(err)
-                console.log('start')
-                const resp = await User.updatePassword(hash, data[0]._id.toString())
-                console.log('end')
+                const resp = await User.findByIdAndUpdate(data._id, { password: hash })
                 res.status(200).json({message: 'User password Updated successfully'})
             })
         }

@@ -14,15 +14,15 @@ exports.createChat = async (req, res) => {
         const message = req.body.sentMessage
         const timeInMs = req.body.timeInMs
         const timeString = req.body.timeString
-        const chat = new OneToOneChat(
+        const chat = new OneToOneChat({
             receiverId,
             message,
             timeInMs,
             timeString,
-            req.user[0]._id
-        )
+            userId: req.user._id
+        })
         await chat.save()
-        res.json({ success: true, userId: req.user[0]._id, chat })
+        res.json({ success: true, userId: req.user._id, chat })
     } catch (error) {
         console.log(error)
     }
@@ -35,9 +35,16 @@ exports.createLinkChat = async (req, res) => {
         const timeInMs = req.body.timeInMs
         const timeString = req.body.timeString
 
-        const users = await User.findByUserNames(selectedUserNames)
+        const users = await User.find({ userName: { $in: selectedUserNames } })
+
         users.forEach(async (user) => {
-            const userChat = new OneToOneChat(user._id, `${message}&currentTextingPerson=${user._id}`, timeInMs, timeString, req.user[0]._id)
+            const userChat = new OneToOneChat({
+                receiverId: user._id,
+                message: `${message}&currentTextingPerson=${user._id}`,
+                timeInMs,
+                timeString,
+                userId: req.user._id
+            })
             await userChat.save()
         })
         res.json({ success: true })
@@ -52,18 +59,22 @@ exports.createGroupChat = async (req, res) => {
         const message = req.body.sentMessage
         const timeInMs = req.body.timeInMs
         const timeString = req.body.timeString
-        console.log(groupId)
-        const chat = await Group.createChat(groupId, {
-            message,
-            timeInMs,
-            timeString,
-            userName: req.user[0].userName,
-            userId: new ObjectId(req.user[0]._id),
-            groupId: new ObjectId(groupId)
-        })
-        const userName = await User.findById(req.user[0]._id)
-        console.log(userName[0].userName)
-        res.json({ success: true, chat, userName: userName[0].userName })
+        console.log(await Group.findById(groupId))
+        const chat = await Group.findByIdAndUpdate(groupId,
+            {
+                $push: {
+                    messages: {
+                        message,
+                        timeInMs,
+                        timeString,
+                        userName: req.user.userName,
+                        userId: new ObjectId(req.user._id),
+                        groupId: new ObjectId(groupId)
+                    }
+                }
+            }, { new: true })
+        const userName = await User.findById(req.user._id)
+        res.json({ success: true, chat: chat.messages[chat.messages.length - 1], userName: userName.userName })
     } catch (error) {
         console.log(error)
     }
@@ -72,8 +83,13 @@ exports.createGroupChat = async (req, res) => {
 exports.loadPreviousChats = async (req, res) => {
     try {
         const receiverId = req.query.receiverId
-        const chats = await OneToOneChat.getPreviousChats(receiverId, req.user[0]._id)
-        res.json({ chats, userId: req.user[0]._id })
+        const chats = await OneToOneChat.find({
+            $or: [
+                { receiverId, userId: req.user._id },
+                { receiverId: req.user._id, userId: receiverId }
+            ]
+        })
+        res.json({ chats, userId: req.user._id })
     } catch (error) {
         console.log(error);
     }

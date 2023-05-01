@@ -15,8 +15,8 @@ socket.on('chatMessage', ({ chat, message }) => {
 });
 
 socket.on('groupChatMessage', ({ chat, message }) => {
-    console.log(chat.chat, localStorage.getItem('currentTextingPerson'), chat.userName.userName, message)
-    loadGroupMessagesFunction(chat.chat, localStorage.getItem('currentTextingPerson'), chat.userName.userName)
+    // console.log(chat.chat, localStorage.getItem('currentTextingPerson'), chat.userName.userName, message)
+    loadGroupMessagesFunction(chat.chat, localStorage.getItem('currentTextingPerson'), chat.userName)
 });
 
 document.addEventListener('submit', (event) => {
@@ -69,7 +69,8 @@ const sentMessageFunction = async () => {
 
         if (groupOrPerson.textContent === 'Group') {
             const data = await axios.post(`http://localhost:3000/chat/create-group-chat/?groupId=${localStorage.getItem('currentTextingPerson')}`, { sentMessage, timeInMs: sentMessageTime.timeInMs, timeString: sentMessageTime.timeString }, { headers: { "Authorization": token } })
-            socket.emit('groupChatMessage', { groupId: parseInt(localStorage.getItem('currentTextingPerson')), message: sentMessage, chat: data.data })
+            // console.log(data)
+            socket.emit('groupChatMessage', { groupId: localStorage.getItem('currentTextingPerson'), message: sentMessage, chat: data.data })
 
         } else {
             const data = await axios.post(`http://localhost:3000/chat/create/?receiverId=${localStorage.getItem('currentTextingPerson')}`, { sentMessage, timeInMs: sentMessageTime.timeInMs, timeString: sentMessageTime.timeString }, { headers: { "Authorization": token } })
@@ -153,7 +154,7 @@ const updateGroupList = async () => {
         const token = localStorage.getItem('token')
         const groupList = document.getElementById('groupList')
         const groups = await axios.get('http://localhost:3000/group/get-groups', { headers: { "Authorization": token } })
-        console.log(groups.data.groups)
+        // console.log(groups.data.groups)
         for (let group of groups.data.groups) {
             const liElement = document.createElement('li')
             liElement.className = 'group'
@@ -185,6 +186,7 @@ const addGroupListners = () => {
     for (let i = 0; i < listOfGroupTokens.length; i++) {
         try {
             document.getElementById(listOfGroupTokens[i]).addEventListener('click', async () => {
+                // console.log('////////////////////')
                 document.getElementById('addNewMemberButtonHere').innerHTML = ''
                 document.getElementById('addMakeAdminButtonHere').innerHTML = ''
                 document.getElementById('addRemoveMemberButtonHere').innerHTML = ''
@@ -324,7 +326,7 @@ const loadPreviousChats = async (userId) => {
                 recentReceivedChat = chat
             }
         }
-        console.log(recentReceivedChat)
+        // console.log(recentReceivedChat)
         if (recentReceivedChat) {
             localStorage.setItem('recentReceivedChat', JSON.stringify(recentReceivedChat))
         } else {
@@ -372,7 +374,7 @@ const loadSocketMessagesFunction = (chat, currentUserId) => {
     divElement.className = 'message-info'
     const spanElement = document.createElement('span')
     spanElement.textContent = chat.timeString
-    console.log(chat.userId, currentUserId, '????????????????????????????????????')
+    // console.log(chat.userId, currentUserId, '????????????????????????????????????')
     divElement.appendChild(spanElement)
     newMessageListItem.appendChild(newParagraph)
     newMessageListItem.appendChild(divElement)
