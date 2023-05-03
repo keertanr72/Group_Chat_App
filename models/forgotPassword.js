@@ -18,10 +18,6 @@ const forgotPasswordSchema = new Schema({
     }
 })
 
-forgotPasswordSchema.statics.checkIsActive = async function() {
-    
-}
-
 module.exports = mongoose.model('ForgotPassword', forgotPasswordSchema)
 
 

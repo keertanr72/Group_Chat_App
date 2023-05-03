@@ -4,10 +4,6 @@ const OneToOneChat = require('../models/oneToOneChat')
 const User = require('../models/user')
 const Group = require('../models/group')
 
-// const Group = require('../models/group')
-// const UserGroup = require('../models/userGroup')
-// const GroupChat = require('../models/groupChat')
-
 exports.createChat = async (req, res) => {
     try {
         const receiverId = req.query.receiverId
@@ -59,7 +55,6 @@ exports.createGroupChat = async (req, res) => {
         const message = req.body.sentMessage
         const timeInMs = req.body.timeInMs
         const timeString = req.body.timeString
-        console.log(await Group.findById(groupId))
         const chat = await Group.findByIdAndUpdate(groupId,
             {
                 $push: {

@@ -7,13 +7,14 @@ const ForgotPassword = require('../models/forgotPassword')
 const User = require('../models/user')
 
 exports.forgotPassword = async (req, res) => {
-    const email = req.body.email
-    const client = Sib.ApiClient.instance
-    const apiKey = client.authentications['api-key']
-    apiKey.apiKey = process.env.API_KEY
-    const tranEmailApi = new Sib.TransactionalEmailsApi()
-    const idOfForgotPassword = uuidv4()
     try {
+        const email = req.body.email
+        const client = Sib.ApiClient.instance
+        const apiKey = client.authentications['api-key']
+        apiKey.apiKey = process.env.API_KEY
+        const tranEmailApi = new Sib.TransactionalEmailsApi()
+        const idOfForgotPassword = uuidv4()
+
         const sender = {
             email: 'keertanr72@gmail.com'
         }
@@ -29,20 +30,23 @@ exports.forgotPassword = async (req, res) => {
             textContent:
                 `Click this for new password: http://localhost:3000/password/forgot-password/${idOfForgotPassword}`
         })
-        const userData = User.findByEmail(email)
+        const userData = User.find({ email })
         const promiseArray = await Promise.all([p1, userData])
-        if (!userData)
+        if (promiseArray[1].length === 0)
             res.status(403).json({ message: 'user doesnt exist' })
-        const ForgotPasswordDetails = new ForgotPassword({
-            forgotPasswordId: idOfForgotPassword,
-            isActive: true,
-            userId: promiseArray[1]._id.toString()
-        })
-        ForgotPasswordDetails.save()
-        res.status(200).json({ message: 'successfull' })
+        else {
+            const ForgotPasswordDetails = new ForgotPassword({
+                forgotPasswordId: idOfForgotPassword,
+                isActive: true,
+                userId: promiseArray[1][0]._id
+            })
+            ForgotPasswordDetails.save()
+            res.status(200).json({ message: 'successfull' })
+        }
+
     } catch (error) {
         console.log(error)
-        res.status(404).send({message: 'user not found'})
+        res.status(404).send({ message: 'user not found' })
     }
 }
 
@@ -50,7 +54,7 @@ exports.getOnLinkClick = async (req, res) => {
     try {
         const forgotPasswordId = req.params.id
         const data = await ForgotPassword.findOne({ forgotPasswordId })
-        if(data.isActive) {
+        if (data.isActive) {
             await ForgotPassword.updateOne({ forgotPasswordId }, { isActive: false })
             res.redirect('http://127.0.0.1:5500/public/newPassword.html')
         } else {
@@ -63,20 +67,20 @@ exports.getOnLinkClick = async (req, res) => {
 
 exports.updatePassword = async (req, res) => {
     try {
-        const {email, password} = req.body
+        const { email, password } = req.body
         const data = await User.findOne({ email })
-        if(!data){
-            res.status(404).json({success: false})
+        if (!data) {
+            res.status(404).json({ success: false })
         } else {
             bcrypt.hash(password, 10, async (err, hash) => {
-                if(err)
-                console.log(err)
+                if (err)
+                    console.log(err)
                 const resp = await User.findByIdAndUpdate(data._id, { password: hash })
-                res.status(200).json({message: 'User password Updated successfully'})
+                res.status(200).json({ message: 'User password Updated successfully' })
             })
         }
     } catch (error) {
         console.log(error)
-        res.status(404).json({success: false})
+        res.status(404).json({ success: false })
     }
 }
